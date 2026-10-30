@@ -55,3 +55,6 @@ set `SITE_PASSWORD` as an environment variable and turn on a public domain.
 1. Make a Twilio account and buy a US number. For US texting, register it for A2P 10DLC (Twilio walks you through this; approval can take days). Until then, trial accounts only text numbers you have verified.
 2. On Render, add: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` (your number like `+14105550123`, or a Messaging Service id starting with `MG`).
 3. Redeploy. When a customer picks "Text me", they get one text with their live tracking link. Without these three, texting is simply skipped.
+
+## Emailing customers the confirm link (Resend)
+Add `RESEND_API_KEY` and `MAIL_FROM` (like `Optimus Garage <bookings@yourdomain.com>`, a domain you verified in Resend) on Render, then redeploy. Customers who pick "Email me" then get a message starting "Please CONFIRM your visit" with a big Confirm button. Without these, email is skipped.

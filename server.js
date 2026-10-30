@@ -201,12 +201,12 @@ const server = http.createServer((req, res) => {
     return;
   }
   // Change or cancel from the tracking page.
-  const am = /^\/api\/track\/([^/]+)\/(reschedule|cancel)$/.exec(pubPath);
+  const am = /^\/api\/track\/([^/]+)\/(reschedule|cancel|confirm)$/.exec(pubPath);
   if (req.method === "POST" && am) {
     if (tooMany(clientIp(req))) return json(res, 429, { ok: false });
     const tok = decodeURIComponent(am[1]);
     readJson(req, 2000, (o) => {
-      const run = am[2] === "cancel" ? booking.cancel(tok) : booking.reschedule(tok, String((o && o.date) || ""), String((o && o.slot) || ""));
+      const run = am[2] === "cancel" ? booking.cancel(tok) : am[2] === "confirm" ? booking.confirm(tok) : booking.reschedule(tok, String((o && o.date) || ""), String((o && o.slot) || ""));
       run.then((r) => { console.log("Jobber: customer " + am[2] + " -> " + JSON.stringify(r).slice(0, 80)); json(res, 200, r); },
         (e) => { console.log("Jobber " + am[2] + " error: " + e.message); json(res, 200, { ok: false, error: "Something went wrong. Please call us." }); });
     });

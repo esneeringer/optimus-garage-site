@@ -4,7 +4,7 @@
   var token=decodeURIComponent(location.pathname.split("/t/")[1]||"");
   var PHONE="+15555550123", cur=-1, info={};
   var STEPS=[
-    {t:"Request received", sub:"We’ll text you to confirm. Tap the confirm link we send."},
+    {t:"Please confirm", sub:"One tap and you’re all set."},
     {t:"Time confirmed",   sub:"You’re all set. We’ll text you when we’re on the way."},
     {t:"We’re on the way", sub:"Tap call if you need us."},
     {t:"All done",         sub:"Thanks for choosing us. Tap call if you need anything."}
@@ -37,6 +37,7 @@
         $("#tk-act").style.display="none"; $("#tk-call").href="tel:"+PHONE; return;
       }
       $("#tk-act").style.display = s.step>=3 ? "none" : "";
+      $("#tk-confirm").style.display = s.step===0 ? "block" : "none";
       var rv=$("#tk-review"); if(s.step>=3 && s.review){rv.href=s.review; rv.style.display="block"}
       if(s.step!==cur) show(s.step);
     }).catch(function(){});
@@ -73,6 +74,13 @@
     fetch("/api/track/"+encodeURIComponent(token)+"/cancel",{method:"POST"}).then(function(r){return r.json()}).then(function(j){
       if(j&&j.ok) check(); else say("Couldn’t cancel. Please call us.",true);
     }).catch(function(){say("Couldn’t cancel. Please call us.",true)});
+  });
+  $("#cf-go").addEventListener("click",function(){
+    var b=this; b.disabled=true; b.textContent="Confirming…";
+    fetch("/api/track/"+encodeURIComponent(token)+"/confirm",{method:"POST"}).then(function(r){return r.json()}).then(function(j){
+      if(j&&j.ok){ b.textContent="Confirmed!"; check(); }
+      else { b.disabled=false; b.textContent="Tap to confirm my appointment"; say("Couldn’t confirm. Please call us.",true); }
+    }).catch(function(){ b.disabled=false; b.textContent="Tap to confirm my appointment"; });
   });
   check(); setInterval(check,10000);
   document.addEventListener("visibilitychange",function(){ if(!document.hidden) check(); });

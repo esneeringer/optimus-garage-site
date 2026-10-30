@@ -249,3 +249,7 @@ header{gap:12px}
 .tk-act select{-webkit-appearance:none;appearance:none;height:52px;border-radius:0}
 .tk-act .ghost{width:100%;box-sizing:border-box}
 .tk-act label{display:block;margin:2px 0 4px;font-weight:700;font-size:.9rem;color:var(--muted)}
+
+.tk-confirm{display:none;margin:14px 0 6px;padding:14px;border:3px solid var(--ink);background:var(--gold)}
+.tk-confirm .slam{width:100%;box-sizing:border-box;background:var(--bg);color:var(--ink);font-size:1.35rem;padding:18px 10px}
+.tk-confirm .cf-note{margin:10px 2px 0;font-weight:700;color:var(--on-gold);text-align:center}

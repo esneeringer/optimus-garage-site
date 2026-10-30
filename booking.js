@@ -3,6 +3,7 @@
 const crypto = require("crypto");
 const jobber = require("./jobber");
 const sms = require("./sms");
+const mail = require("./mail");
 const photos = require("./photos");
 
 // Tracking links are signed, so they work without a database and survive restarts.
@@ -126,15 +127,21 @@ async function updatePrefs(p) {
   if (p.channel === "email" && p.email) input.emailsToAdd = [{ address: p.email, description: "MAIN", primary: true }];
   if (p.channel === "text" && b.phoneId) input.phonesToEdit = [{ id: b.phoneId, smsAllowed: true }];
   let texted = "";
-  if (p.channel === "text") {
-    // Our own text, with the live tracking link. Only sent because the customer picked "text me".
-    const base = (process.env.PUBLIC_URL || (process.env.JOBBER_REDIRECT_URI || "").replace(/\/jobber\/.*$/, "")).replace(/\/$/, "");
-    if (base) {
-      const nice = new Date(b.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-      try {
-        texted = " | " + await sms.send(b.phone, "Optimus Garage: we got your " + b.service.toLowerCase() + " request for " + nice + ", " + b.slot + ". Follow it live: " + base + "/t/" + b.token + "  Reply STOP to opt out.");
-      } catch (e) { texted = " | text failed: " + e.message; }
-    }
+  const base = (process.env.PUBLIC_URL || (process.env.JOBBER_REDIRECT_URI || "").replace(/\/jobber\/.*$/, "")).replace(/\/$/, "");
+  if (base && b.token && (p.channel === "text" || p.channel === "email")) {
+    // Our own message, with the confirm button's link. Only sent on the channel the customer picked.
+    const link = base + "/t/" + b.token;
+    const nice = new Date(b.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+    const what = String(b.service || "service").toLowerCase() + " visit (" + nice + ", " + b.slot + ")";
+    try {
+      if (p.channel === "text") {
+        texted = " | " + await sms.send(b.phone, "Optimus Garage: CONFIRM your " + what + " here: " + link + "  Reply STOP to opt out.");
+      } else {
+        texted = " | " + await mail.send(p.email, "Please confirm your visit with Optimus Garage",
+          "Please CONFIRM your " + what + " by tapping this link, then the big Confirm button:\n\n" + link + "\n\nThanks,\nOptimus Garage Company",
+          "<p><strong>Please CONFIRM your " + what + ".</strong></p><p><a href=\"" + link + "\" style=\"display:inline-block;background:#F5CB45;color:#0A1A3A;font-weight:800;padding:14px 22px;border:3px solid #0A1A3A;text-decoration:none\">Confirm my appointment</a></p><p>Or paste this into your browser:<br>" + link + "</p><p>Thanks,<br>Optimus Garage Company</p>");
+      }
+    } catch (e) { texted = " | message failed: " + e.message; }
   }
   if (!Object.keys(input).length) return "nothing to update" + texted;
   const r = await jobber.gql(
@@ -154,6 +161,8 @@ async function statusOf(requestId) {
     { id: requestId }
   );
   const a = (d.request && d.request.assessment) || {};
+  const ourConfirm = /CONFIRMED by customer/.test((d.request && d.request.title) || "");
+  a.clientConfirmed = a.clientConfirmed || ourConfirm;
   let step = 0;
   if (a.clientConfirmed) step = 1;
   if (a.isComplete) step = 3;
@@ -243,6 +252,19 @@ async function note(requestId, message) {
   } catch (e) { console.log("Jobber note error: " + e.message); }
 }
 
+// One tap on the tracking page: mark the visit confirmed in Jobber (title tag + note for the team).
+async function confirm(token) {
+  const t = readToken(token);
+  if (!t || !jobber.connected()) throw new Error("bad link");
+  const cur = await jobber.gql(`query($id: EncodedId!){ request(id:$id){ title } }`, { id: t.r });
+  const title = (cur.request && cur.request.title) || "Website booking";
+  if (!/CONFIRMED by customer/.test(title)) {
+    await jobber.gql(`mutation($id: EncodedId!, $input: RequestEditInput!){ requestEdit(requestId:$id, input:$input){ userErrors{ message } } }`, { id: t.r, input: { title: "CONFIRMED by customer | " + title } });
+    await note(t.r, "Customer confirmed the appointment from the website (" + t.d + ", " + t.w + ").");
+  }
+  return { ok: true };
+}
+
 // Cancel from the tracking page: free the calendar slot and mark the request cancelled.
 async function cancel(token) {
   const t = readToken(token);
@@ -260,4 +282,4 @@ async function cancel(token) {
   return { ok: true };
 }
 
-module.exports = { availability, reschedule, cancel, status, statusByToken, readToken, rememberLead, bookTime, updatePrefs, parseWindow, parseAddress };
+module.exports = { availability, reschedule, cancel, confirm, status, statusByToken, readToken, rememberLead, bookTime, updatePrefs, parseWindow, parseAddress };
