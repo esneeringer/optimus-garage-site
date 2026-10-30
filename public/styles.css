@@ -68,6 +68,9 @@ section h2{margin-bottom:6px}
 .svc button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px;border:3px solid var(--ink);background:var(--surface);box-shadow:0 6px 0 var(--ink);transition:transform .06s,box-shadow .06s;touch-action:manipulation;min-height:72px}
 .svc button:active,.svc button.hit{transform:translateY(6px);box-shadow:0 0 0 var(--ink)}
 .svc button:focus-visible{outline:4px solid var(--accent-text);outline-offset:3px}
+.svc button:active,.svc button.hit{background:var(--blue);color:var(--on-blue);box-shadow:inset 0 -6px 0 var(--accent-text)}
+.svc button:active small,.svc button.hit small{color:var(--on-blue)}
+@media (hover:hover){.svc button:hover{background:var(--blue);color:var(--on-blue)}.svc button:hover small{color:var(--on-blue)}}
 .svc .ic{flex:none;width:46px;height:46px;background:var(--blue);color:var(--on-blue);display:grid;place-items:center;font-size:1.5rem;border:3px solid var(--line)}
 
 
