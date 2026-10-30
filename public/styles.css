@@ -3,8 +3,8 @@
   --blue:#A8D3F2; --accent-text:#2F5F8F; --on-blue:#0A1A3A; --red:#D9544A; --red-text:#C0352C; --gold:#F5CB45; --on-gold:#0A1A3A; --gun:#4A5560; --line:#0A1A3A;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#323B48;--surface:#3D4756;--ink:#F4F7FB;--muted:#C5CEDB;--line:#6F8199;--blue:#3E6C9C;--on-blue:#EAF4FD;--accent-text:#8EC5F2;--gold:#F5CB45;--on-gold:#0A1A3A;--gun:#6B7682;--red:#D9544A;--red-text:#FF8B82;}}
-:root[data-theme="dark"]{--bg:#323B48;--surface:#3D4756;--ink:#F4F7FB;--muted:#C5CEDB;--line:#6F8199;--blue:#3E6C9C;--on-blue:#EAF4FD;--accent-text:#8EC5F2;--gold:#F5CB45;--on-gold:#0A1A3A;--gun:#6B7682;--red:#D9544A;--red-text:#FF8B82;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#323B48;--head:#232A34;--surface:#4B5668;--ink:#F4F7FB;--muted:#C5CEDB;--line:#6F8199;--blue:#3E6C9C;--on-blue:#EAF4FD;--accent-text:#8EC5F2;--gold:#F5CB45;--on-gold:#0A1A3A;--gun:#6B7682;--red:#D9544A;--red-text:#FF8B82;}}
+:root[data-theme="dark"]{--bg:#323B48;--head:#232A34;--surface:#4B5668;--ink:#F4F7FB;--muted:#C5CEDB;--line:#6F8199;--blue:#3E6C9C;--on-blue:#EAF4FD;--accent-text:#8EC5F2;--gold:#F5CB45;--on-gold:#0A1A3A;--gun:#6B7682;--red:#D9544A;--red-text:#FF8B82;}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font:500 17px/1.45 "Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:92px;overflow-x:hidden}
@@ -16,7 +16,7 @@ p{margin:0}
 .wrap{max-width:560px;margin:0 auto;padding:0 18px}
 
 /* header */
-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;max-width:560px;margin:0 auto}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;max-width:560px;margin:0 auto;background:var(--head,var(--bg));box-shadow:0 0 0 100vmax var(--head,var(--bg));clip-path:inset(0 -100vmax)}
 .logo{display:flex;align-items:center;gap:10px;font-family:"Barlow Condensed",Impact,sans-serif;font-weight:900;font-size:1.5rem;text-transform:uppercase;line-height:.9;color:var(--ink)}
 .mark{width:46px;height:46px;flex:none}
 .logo small{display:block;font-size:.8rem;letter-spacing:.2em;color:var(--accent-text)}
