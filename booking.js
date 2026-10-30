@@ -161,8 +161,6 @@ async function statusOf(requestId) {
     { id: requestId }
   );
   const a = (d.request && d.request.assessment) || {};
-  const ourConfirm = /CONFIRMED by customer/.test((d.request && d.request.title) || "");
-  a.clientConfirmed = a.clientConfirmed || ourConfirm;
   let step = 0;
   if (a.clientConfirmed) step = 1;
   if (a.isComplete) step = 3;
