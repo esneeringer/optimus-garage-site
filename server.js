@@ -181,6 +181,16 @@ const server = http.createServer((req, res) => {
     return reply(res, 404, "Not found");
   }
 
+  // Live status for the waiting page (read from Jobber).
+  if (req.method === "GET" && req.url.startsWith("/api/status")) {
+    const phone = new URL(req.url, "http://x").searchParams.get("phone") || "";
+    booking.status(phone).then(
+      (r) => reply(res, 200, JSON.stringify(r), "application/json"),
+      (e) => { console.log("Jobber status error: " + e.message); reply(res, 200, '{"known":false}', "application/json"); }
+    );
+    return;
+  }
+
   // Jobber connection (all behind the site password).
   if (req.method === "GET" && req.url.split("?")[0].startsWith("/jobber/")) {
     const u = new URL(req.url, "http://x");

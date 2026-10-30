@@ -38,6 +38,7 @@ function parseWindow(slot) {
 function rememberLead(r) {
   pending.set(digits(r.phone), { ...r, at: Date.now() });
   for (const [k, v] of pending) if (Date.now() - v.at > 6 * 3600 * 1000) pending.delete(k); // forget old ones
+  return "remembered details for " + digits(r.phone);
 }
 
 async function bookTime(s) {
@@ -80,7 +81,7 @@ async function bookTime(s) {
   );
   const rc = req.requestCreate;
   if (rc.userErrors && rc.userErrors.length) throw new Error("requestCreate: " + rc.userErrors.map((e) => e.message).join("; "));
-  booked.set(key, { clientId: client.id, phoneId: client.phones && client.phones[0] ? client.phones[0].id : null });
+  booked.set(key, { requestId: rc.request.id, clientId: client.id, phoneId: client.phones && client.phones[0] ? client.phones[0].id : null });
   return "created client + request " + rc.request.id + " scheduled " + s.date + " " + win[0] + "-" + win[1];
 }
 
@@ -101,4 +102,20 @@ async function updatePrefs(p) {
   return "updated client contact preference (" + p.channel + ")";
 }
 
-module.exports = { rememberLead, bookTime, updatePrefs, parseWindow, parseAddress };
+// Where is this customer's appointment right now? Read live from Jobber.
+// step 0 = received, 1 = confirmed by the customer, 3 = assessment finished. (Jobber's API has no "on the way" signal.)
+async function status(phone) {
+  const b = booked.get(digits(phone));
+  if (!b || !b.requestId || !jobber.connected()) return { known: false };
+  const d = await jobber.gql(
+    `query($id: EncodedId!){ request(id:$id){ id status isScheduled assessment{ startAt endAt clientConfirmed isComplete completedAt } } }`,
+    { id: b.requestId }
+  );
+  const a = (d.request && d.request.assessment) || {};
+  let step = 0;
+  if (a.clientConfirmed) step = 1;
+  if (a.isComplete) step = 3;
+  return { known: true, step, startAt: a.startAt || null, endAt: a.endAt || null, confirmed: !!a.clientConfirmed, complete: !!a.isComplete };
+}
+
+module.exports = { status, rememberLead, bookTime, updatePrefs, parseWindow, parseAddress };

@@ -240,6 +240,7 @@ $("#seeupd").addEventListener("click",function(){
   post("/api/prefs",{phone:req.phone,channel:channel,email:req.email});
   closeSheet();
   openTrack(0);
+  startPoll();
 });
 
 /* ---------- customer tracker (what the update link opens) ---------- */
@@ -248,7 +249,7 @@ var STEPS=[
   {t:"Request received", big:function(){return whenText()}, sub:function(v){return "We’ll "+v+" you to confirm within 15 minutes."}},
   {t:"Time confirmed",   big:function(){return whenText()}, sub:function(v){return "We’ll "+v+" you when we’re on the way."}},
   {t:"We’re on the way", big:function(){return "About 20 min away"}, sub:function(){return "Arriving in your "+(req.slot||"2–4 PM")+" window. Tap call if you need us."}},
-  {t:"We’re here",       big:function(){return "At your garage"}, sub:function(){return "Tap call if you need anything."}}
+  {t:"All done",         big:function(){return "Visit complete"}, sub:function(){return "Thanks for choosing us. Tap call if you need anything."}}
 ];
 function showStep(i){
   var s=STEPS[i];
@@ -269,7 +270,19 @@ function openTrack(i){
   track.classList.add("open"); track.setAttribute("aria-hidden","false");
   track.scrollTop=0; lockScroll(true);
 }
-function closeTrack(){track.classList.remove("open");track.setAttribute("aria-hidden","true");lockScroll(false)}
+var poller=null;
+function stopPoll(){if(poller){clearInterval(poller);poller=null}}
+/* Ask the server (which asks Jobber) where the appointment stands, and move the progress bar to match. */
+function pollStatus(){
+  if(!req.phone) return;
+  fetch("/api/status?phone="+encodeURIComponent(req.phone)).then(function(r){return r.json()}).then(function(s){
+    if(!s||!s.known||!track.classList.contains("open")) return;
+    if(s.step>live) { live=s.step; showStep(live); }
+  }).catch(function(){});
+}
+var live=0;
+function startPoll(){ stopPoll(); live=0; pollStatus(); poller=setInterval(pollStatus,15000); }
+function closeTrack(){stopPoll();track.classList.remove("open");track.setAttribute("aria-hidden","true");lockScroll(false)}
 $("#tk-close").addEventListener("click",closeTrack);
 $$("#tk-demo .chip").forEach(function(c,k){c.addEventListener("click",function(){showStep(k)})});
 
