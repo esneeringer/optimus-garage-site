@@ -207,7 +207,7 @@ async function availability(from, to) {
     const list = Object.keys(counts[day]).filter((i) => counts[day][i] >= CAPACITY).map(Number);
     if (list.length) taken[day] = list;
   });
-  const val = { ok: true, taken };
+  const val = { ok: true, taken, seen: ((d.scheduledItems && d.scheduledItems.nodes) || []).length };
   avCache = { key, at: Date.now(), val };
   return val;
 }
