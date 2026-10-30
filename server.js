@@ -7,6 +7,7 @@ const http = require("http");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const jobber = require("./jobber");
 
 const PORT = process.env.PORT || 3000;
 const PASSWORD = process.env.SITE_PASSWORD || "";
@@ -174,6 +175,44 @@ const server = http.createServer((req, res) => {
     if (req.url === "/api/prefs") {
       return saveJson(req, res, "prefs", (r) =>
         "Updates for " + r.phone + ": by " + r.channel + (r.email ? " (" + r.email + ")" : ""));
+    }
+    return reply(res, 404, "Not found");
+  }
+
+  // Jobber connection (all behind the site password).
+  if (req.method === "GET" && req.url.split("?")[0].startsWith("/jobber/")) {
+    const u = new URL(req.url, "http://x");
+    const page = (title, html) => reply(res, 200, `<!DOCTYPE html><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${title}</title><body style="font:16px system-ui;max-width:560px;margin:24px auto;padding:0 16px;color:#0A1A3A"><h2>${title}</h2>${html}</body>`, "text/html; charset=utf-8");
+    if (u.pathname === "/jobber/status") {
+      return reply(res, 200, JSON.stringify({ configured: jobber.configured(), connected: jobber.connected() }), "application/json");
+    }
+    if (!jobber.configured()) {
+      return page("Jobber is not set up yet", "<p>Add JOBBER_CLIENT_ID, JOBBER_CLIENT_SECRET and JOBBER_REDIRECT_URI in the Render environment first.</p>");
+    }
+    if (u.pathname === "/jobber/connect") {
+      const state = crypto.randomBytes(16).toString("hex");
+      res.writeHead(302, { Location: jobber.authorizeUrl(state), "Set-Cookie": "og_state=" + state + "; Path=/; HttpOnly; SameSite=Lax; Max-Age=600" + (req.headers["x-forwarded-proto"] === "https" ? "; Secure" : "") });
+      return res.end();
+    }
+    if (u.pathname === "/jobber/callback") {
+      const m = /(?:^|;\s*)og_state=([a-f0-9]+)/.exec(req.headers.cookie || "");
+      if (!m || m[1] !== u.searchParams.get("state") || !u.searchParams.get("code")) return page("Could not connect", "<p>The sign-in did not match. Go back to <a href='/jobber/connect'>/jobber/connect</a> and try again.</p>");
+      jobber.exchangeCode(u.searchParams.get("code")).then(
+        (t) => {
+          console.log("Jobber connected.");
+          page("Jobber connected", "<p>Done. This server can now talk to your Jobber account until it restarts.</p><p>So it keeps working after a restart, add this in Render as <b>JOBBER_REFRESH_TOKEN</b> (Environment tab):</p><p style='word-break:break-all;background:#F3F8FC;padding:10px;border:2px solid #0A1A3A'>" + String(t.refresh_token || "(none returned)").replace(/[<>&]/g, "") + "</p><p><a href='/jobber/status'>Check status</a></p>");
+        },
+        (e) => { console.log("Jobber connect failed: " + e.message); page("Could not connect", "<p>" + String(e.message).replace(/[<>&]/g, "") + "</p>"); }
+      );
+      return;
+    }
+    if (u.pathname === "/jobber/schema") {
+      if (!jobber.connected()) return page("Not connected", "<p>Connect first at <a href='/jobber/connect'>/jobber/connect</a>.</p>");
+      jobber.describeType(u.searchParams.get("type") || "Mutation").then(
+        (d) => reply(res, 200, JSON.stringify(d, null, 1), "application/json"),
+        (e) => reply(res, 502, e.message)
+      );
+      return;
     }
     return reply(res, 404, "Not found");
   }
