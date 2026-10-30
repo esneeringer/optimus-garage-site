@@ -140,6 +140,11 @@
       <span class="tag" aria-hidden="true">Phone</span>
       <p class="err" id="e-ph" role="alert"></p>
     </div>
+    <div class="fld" id="f-em">
+      <input id="em" type="email" inputmode="email" autocomplete="email" aria-label="Your email" placeholder="e.g. name@example.com" aria-describedby="e-em">
+      <span class="tag" aria-hidden="true">Email</span>
+      <p class="err" id="e-em" role="alert"></p>
+    </div>
     <div class="fld">
       <input id="ad" aria-label="Service address" autocomplete="street-address" placeholder="e.g. 412 Frederick Rd" aria-describedby="e-ad">
       <span class="tag" aria-hidden="true">Address</span>
@@ -174,15 +179,10 @@
   </div>
   <div class="ok" id="ok" role="status">
     <div class="big">Locked in.</div>
-    <p id="ok-p">Your time is reserved. Where should we send updates?</p>
+    <p id="ok-p">Your time is reserved. Where should we send your “on the way” updates? We’ll also email your booking details.</p>
     <div class="chips" id="chan" role="group" aria-label="How should we send updates?">
       <button class="chip" aria-pressed="true" data-ch="text">Text me</button>
       <button class="chip" aria-pressed="false" data-ch="email">Email me</button>
-    </div>
-    <div class="fld" id="f-em" style="display:none">
-      <input id="em" type="email" inputmode="email" autocomplete="email" aria-label="Your email" placeholder="e.g. name@example.com" aria-describedby="e-em">
-      <span class="tag" aria-hidden="true">Email</span>
-      <p class="err" id="e-em" role="alert"></p>
     </div>
     <button class="slam blue" id="seeupd">See my updates</button>
   </div>

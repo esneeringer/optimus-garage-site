@@ -37,7 +37,7 @@ const SHAPES = {
 };
 // The fields that must be filled in for a post to be accepted.
 const VALID = {
-  request: (r) => r.name && r.phone && r.address && r.service,
+  request: (r) => r.name && r.phone && r.address && r.service && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(r.email || ""),
   prefs: (r) => r.phone && (r.channel === "text" || r.channel === "email"),
   schedule: (r) => r.phone && /^\d{4}-\d{2}-\d{2}$/.test(r.date || "") && r.slot,
 };

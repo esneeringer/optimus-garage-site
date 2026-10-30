@@ -126,10 +126,10 @@ scrim.addEventListener("click",closeSheet);
 
 /* Step 1: details. Saved right away, so you have the lead even if they stop here. */
 $("#send").addEventListener("click",function(){
-  if(!validate(["nm","ph","ad"])) return;
+  if(!validate(["nm","ph","em","ad"])) return;
   var n=$("#nm"), p=$("#ph"), a=$("#ad");
-  req={service:service,name:n.value.trim(),phone:p.value.trim(),address:a.value.trim(),note:$("#nt").value.trim(),email:"",date:"",slot:"",when:""};
-  var key=JSON.stringify([req.service,req.name,req.phone,req.address,req.note]);
+  req={service:service,name:n.value.trim(),phone:p.value.trim(),address:a.value.trim(),note:$("#nt").value.trim(),email:$("#em").value.trim(),date:"",slot:"",when:""};
+  var key=JSON.stringify([req.service,req.name,req.phone,req.email,req.address,req.note]);
   if(key!==leadKey){ post("/api/request",req); leadKey=key; }
   openWhen();
 });
@@ -243,14 +243,9 @@ $$("#chan .chip").forEach(function(c){
   c.addEventListener("click",function(){
     channel=c.dataset.ch;
     $$("#chan .chip").forEach(function(x){x.setAttribute("aria-pressed",x===c?"true":"false")});
-    $("#f-em").style.display = channel==="email" ? "block" : "none";
-    if(channel==="email") $("#em").focus();
   });
 });
 $("#seeupd").addEventListener("click",function(){
-  var em=$("#em");
-  if(channel==="email" && !validate(["em"])) return;
-  req.email = channel==="email" ? em.value.trim() : "";
   var btn=$("#seeupd"); btn.disabled=true;
   Promise.resolve(req.saving).then(function(){
     return post("/api/prefs",{phone:req.phone,channel:channel,email:req.email,t:(req.track.split("/t/")[1]||"")});

@@ -58,6 +58,19 @@ function rememberLead(r) {
   return "remembered details for " + digits(r.phone);
 }
 
+const publicBase = () => (process.env.PUBLIC_URL || (process.env.JOBBER_REDIRECT_URI || "").replace(/\/jobber\/.*$/, "")).replace(/\/$/, "");
+const niceDay = (d) => new Date(d + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+// The booking confirmation email: always sent, since email is required to book.
+async function sendBookedEmail(x) {
+  const base = publicBase();
+  if (!base) return "skipped (no public address)";
+  const link = base + "/t/" + x.token;
+  const what = String(x.service || "service").toLowerCase() + " visit on " + niceDay(x.date) + ", " + x.slot;
+  return mail.send(x.email, "You're booked with Optimus Garage",
+    "You're booked: " + what + ".\n\nFollow your appointment live (and change or cancel it) here:\n" + link + "\n\nWe'll text or email you when we're on the way.\n\nOptimus Garage Company",
+    "<div style=\"font-family:Arial,sans-serif;color:#0A1A3A;max-width:480px\"><h2 style=\"margin:0 0 8px\">You're booked!</h2><p style=\"font-size:16px\">" + what + "</p><p><a href=\"" + link + "\" style=\"display:inline-block;background:#F5CB45;color:#0A1A3A;font-weight:800;padding:14px 22px;border:3px solid #0A1A3A;text-decoration:none\">Follow my appointment</a></p><p style=\"color:#4B5668\">You can change or cancel from that page. We'll text or email you when we're on the way.</p><p>Optimus Garage Company</p></div>");
+}
+
 async function bookTime(s) {
   if (!jobber.connected()) return "skipped (Jobber not connected)";
   const key = digits(s.phone);
@@ -74,6 +87,7 @@ async function bookTime(s) {
     { input: {
         firstName, lastName,
         phones: [{ number: lead.phone, description: "MOBILE", primary: true, smsAllowed: false }],
+        emails: lead.email ? [{ address: lead.email, description: "MAIN", primary: true }] : undefined,
         properties: [{ address: parseAddress(lead.address) }],
         sourceAttribution: { sourceText: "Optimus Garage website" },
     } }
@@ -112,7 +126,12 @@ async function bookTime(s) {
       photoNote = " + " + urls.length + " photo(s)";
     } catch (e) { photoNote = " (photos failed: " + e.message + ")"; }
   }
-  return { log: "created client + request " + rc.request.id + " scheduled " + s.date + " " + win[0] + "-" + win[1] + photoNote, token };
+  let emailed = "";
+  if (lead.email) {
+    try { emailed = " | " + (await sendBookedEmail({ email: lead.email, token, service: lead.service, date: s.date, slot: s.slot })); }
+    catch (e) { emailed = " | email failed: " + e.message; }
+  }
+  return { log: "created client + request " + rc.request.id + " scheduled " + s.date + " " + win[0] + "-" + win[1] + photoNote + emailed, token };
 }
 
 async function updatePrefs(p) {
@@ -124,24 +143,16 @@ async function updatePrefs(p) {
   }
   if (!b || !b.clientId) return "skipped (no Jobber client for this phone)";
   const input = {};
-  if (p.channel === "email" && p.email) input.emailsToAdd = [{ address: p.email, description: "MAIN", primary: true }];
   if (p.channel === "text" && b.phoneId) input.phonesToEdit = [{ id: b.phoneId, smsAllowed: true }];
   let texted = "";
-  const base = (process.env.PUBLIC_URL || (process.env.JOBBER_REDIRECT_URI || "").replace(/\/jobber\/.*$/, "")).replace(/\/$/, "");
-  if (base && b.token && (p.channel === "text" || p.channel === "email")) {
-    // Our own message, with the confirm button's link. Only sent on the channel the customer picked.
-    const link = base + "/t/" + b.token;
-    const nice = new Date(b.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
-    const what = String(b.service || "service").toLowerCase() + " visit (" + nice + ", " + b.slot + ")";
-    try {
-      if (p.channel === "text") {
-        texted = " | " + await sms.send(b.phone, "Optimus Garage: you're booked! " + what.charAt(0).toUpperCase() + what.slice(1) + ". Follow it live: " + link + "  Reply STOP to opt out.");
-      } else {
-        texted = " | " + await mail.send(p.email, "You're booked with Optimus Garage",
-          "You're booked: " + what + ". Follow your appointment live here:\n\n" + link + "\n\nThanks,\nOptimus Garage Company",
-          "<p><strong>You're booked: " + what + ".</strong></p><p><a href=\"" + link + "\" style=\"display:inline-block;background:#F5CB45;color:#0A1A3A;font-weight:800;padding:14px 22px;border:3px solid #0A1A3A;text-decoration:none\">Follow my appointment</a></p><p>Or paste this into your browser:<br>" + link + "</p><p>Thanks,<br>Optimus Garage Company</p>");
-      }
-    } catch (e) { texted = " | message failed: " + e.message; }
+  if (p.channel === "text" && b.token) {
+    // Text the tracking link only if they chose texts. (The email always goes out at booking.)
+    const base = publicBase();
+    if (base) {
+      const what = String(b.service || "service").toLowerCase() + " visit (" + niceDay(b.date) + ", " + b.slot + ")";
+      try { texted = " | " + await sms.send(b.phone, "Optimus Garage: you're booked! " + what.charAt(0).toUpperCase() + what.slice(1) + ". Follow it live: " + base + "/t/" + b.token + "  Reply STOP to opt out."); }
+      catch (e) { texted = " | text failed: " + e.message; }
+    }
   }
   if (!Object.keys(input).length) return "nothing to update" + texted;
   const r = await jobber.gql(
