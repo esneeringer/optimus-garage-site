@@ -2,6 +2,7 @@
 // Does nothing (and never breaks the site) when Jobber is not connected.
 const crypto = require("crypto");
 const jobber = require("./jobber");
+const sms = require("./sms");
 
 // Tracking links are signed, so they work without a database and survive restarts.
 const SECRET = process.env.TRACK_SECRET || process.env.JOBBER_CLIENT_SECRET || process.env.SITE_PASSWORD || "dev-only";
@@ -95,8 +96,9 @@ async function bookTime(s) {
   );
   const rc = req.requestCreate;
   if (rc.userErrors && rc.userErrors.length) throw new Error("requestCreate: " + rc.userErrors.map((e) => e.message).join("; "));
-  booked.set(key, { requestId: rc.request.id, clientId: client.id, phoneId: client.phones && client.phones[0] ? client.phones[0].id : null });
   const token = makeToken({ r: rc.request.id, a: lead.address, s: lead.service, d: s.date, w: s.slot });
+  booked.set(key, { requestId: rc.request.id, clientId: client.id, phoneId: client.phones && client.phones[0] ? client.phones[0].id : null,
+    token, phone: lead.phone, service: lead.service, date: s.date, slot: s.slot });
   return { log: "created client + request " + rc.request.id + " scheduled " + s.date + " " + win[0] + "-" + win[1], token };
 }
 
@@ -107,14 +109,25 @@ async function updatePrefs(p) {
   const input = {};
   if (p.channel === "email" && p.email) input.emailsToAdd = [{ address: p.email, description: "MAIN", primary: true }];
   if (p.channel === "text" && b.phoneId) input.phonesToEdit = [{ id: b.phoneId, smsAllowed: true }];
-  if (!Object.keys(input).length) return "nothing to update";
+  let texted = "";
+  if (p.channel === "text") {
+    // Our own text, with the live tracking link. Only sent because the customer picked "text me".
+    const base = (process.env.PUBLIC_URL || (process.env.JOBBER_REDIRECT_URI || "").replace(/\/jobber\/.*$/, "")).replace(/\/$/, "");
+    if (base) {
+      const nice = new Date(b.date + "T12:00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+      try {
+        texted = " | " + await sms.send(b.phone, "Optimus Garage: we got your " + b.service.toLowerCase() + " request for " + nice + ", " + b.slot + ". Follow it live: " + base + "/t/" + b.token + "  Reply STOP to opt out.");
+      } catch (e) { texted = " | text failed: " + e.message; }
+    }
+  }
+  if (!Object.keys(input).length) return "nothing to update" + texted;
   const r = await jobber.gql(
     `mutation($id: EncodedId!, $input: ClientEditInput!){ clientEdit(clientId:$id, input:$input){ client{ id } userErrors{ message path } } }`,
     { id: b.clientId, input }
   );
   const errs = r.clientEdit.userErrors;
   if (errs && errs.length) throw new Error("clientEdit: " + errs.map((e) => e.message).join("; "));
-  return "updated client contact preference (" + p.channel + ")";
+  return "updated client contact preference (" + p.channel + ")" + texted;
 }
 
 // Where is this customer's appointment right now? Read live from Jobber.

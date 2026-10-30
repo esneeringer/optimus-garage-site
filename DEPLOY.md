@@ -50,3 +50,8 @@ anything for the username and your SITE_PASSWORD for the password.
 
 Railway and similar services can run this too. They detect `npm start` on their own;
 set `SITE_PASSWORD` as an environment variable and turn on a public domain.
+
+## Texting customers their tracking link (Twilio)
+1. Make a Twilio account and buy a US number. For US texting, register it for A2P 10DLC (Twilio walks you through this; approval can take days). Until then, trial accounts only text numbers you have verified.
+2. On Render, add: `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM` (your number like `+14105550123`, or a Messaging Service id starting with `MG`).
+3. Redeploy. When a customer picks "Text me", they get one text with their live tracking link. Without these three, texting is simply skipped.
