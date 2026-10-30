@@ -13,7 +13,7 @@ const https = require("https");
 const CLIENT_ID = process.env.JOBBER_CLIENT_ID || "";
 const CLIENT_SECRET = process.env.JOBBER_CLIENT_SECRET || "";
 const REDIRECT_URI = process.env.JOBBER_REDIRECT_URI || "";
-const API_VERSION = process.env.JOBBER_API_VERSION || "";
+const API_VERSION = process.env.JOBBER_API_VERSION || "2025-04-16";
 const TOKEN_FILE = path.join(__dirname, "jobber-token.json");
 
 let refreshToken = process.env.JOBBER_REFRESH_TOKEN || "";
@@ -94,7 +94,7 @@ async function gql(query, variables) {
   if (API_VERSION) headers["X-JOBBER-GRAPHQL-VERSION"] = API_VERSION;
   const res = await request("https://api.getjobber.com/api/graphql", { method: "POST", headers, body });
   if (res.status === 401) accessToken = ""; // force a refresh next time
-  if (res.status !== 200 || !res.json) throw new Error("Jobber API error (" + res.status + ")");
+  if (res.status !== 200 || !res.json) throw new Error("Jobber API error (" + res.status + "): " + String(res.text).slice(0, 300));
   if (res.json.errors && res.json.errors.length) throw new Error("Jobber: " + res.json.errors.map((e) => e.message).join("; "));
   return res.json.data;
 }
