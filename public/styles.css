@@ -1,11 +1,11 @@
 :root{
   --bg:#fff; --surface:#FFF3E8; --ink:#0A1A3A; --muted:#4B5668;
-  --blue:#153C9E; --red:#E8590C; --red-text:#B84A10; --gold:#8AA8CF; --on-gold:#0A1A3A; --line:#0A1A3A;
+  --blue:#0A1A3A; --red:#D14E0F; --red-text:#A63F0C; --gold:#8AA8CF; --on-gold:#0A1A3A; --line:#0A1A3A;
   --on-blue:#fff;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#050D20;--surface:#0E1B3A;--ink:#F4F7FD;--muted:#B3BFDB;--line:#F4F7FD;--blue:#2148B8;--gold:#46618C;--on-gold:#fff;--red:#F0600F;--red-text:#FF8A4C;}}
-:root[data-theme="dark"]{--bg:#050D20;--surface:#0E1B3A;--ink:#F4F7FD;--muted:#B3BFDB;--line:#F4F7FD;--blue:#2148B8;--gold:#46618C;--on-gold:#fff;--red:#F0600F;--red-text:#FF8A4C;}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#050D20;--surface:#0E1B3A;--ink:#F4F7FD;--muted:#B3BFDB;--line:#F4F7FD;--blue:#17306B;--gold:#46618C;--on-gold:#fff;--red:#E0560F;--red-text:#FF8A4C;}}
+:root[data-theme="dark"]{--bg:#050D20;--surface:#0E1B3A;--ink:#F4F7FD;--muted:#B3BFDB;--line:#F4F7FD;--blue:#17306B;--gold:#46618C;--on-gold:#fff;--red:#E0560F;--red-text:#FF8A4C;}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font:500 17px/1.45 "Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:92px;overflow-x:hidden}
@@ -31,7 +31,7 @@ header{display:flex;align-items:center;justify-content:space-between;padding:12p
 .slam:focus-visible,.chip:focus-visible,input:focus-visible,.tel:focus-visible{outline:4px solid var(--red);outline-offset:3px}
 #page.shake{animation:shake .28s cubic-bezier(.36,.07,.19,.97)}
 @keyframes shake{10%{transform:translate(-3px,5px)}30%{transform:translate(4px,-4px)}50%{transform:translate(-3px,3px)}70%{transform:translate(2px,-2px)}100%{transform:none}}
-.dust{position:fixed;left:0;right:0;bottom:0;height:40vh;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(232,89,12,.55),transparent 65%);opacity:0;z-index:40}
+.dust{position:fixed;left:0;right:0;bottom:0;height:40vh;pointer-events:none;background:radial-gradient(ellipse at 50% 100%,rgba(209,78,15,.55),transparent 65%);opacity:0;z-index:40}
 .dust.go{animation:dust .45s ease-out}
 @keyframes dust{0%{opacity:.9}100%{opacity:0}}
 
