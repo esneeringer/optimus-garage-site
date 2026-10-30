@@ -243,3 +243,9 @@ header{gap:12px}
 .tk-act .msg{margin:8px 0 0;font-weight:700;color:var(--accent-text)}
 .tk-act .msg.bad{color:var(--red-text)}
 .tk-review{display:none;margin-top:16px}
+
+.tk-act input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;height:52px;line-height:1.2;text-align:left}
+.tk-act input[type=date]::-webkit-date-and-time-value{text-align:left;min-height:1.2em}
+.tk-act select{-webkit-appearance:none;appearance:none;height:52px;border-radius:0}
+.tk-act .ghost{width:100%;box-sizing:border-box}
+.tk-act label{display:block;margin:2px 0 4px;font-weight:700;font-size:.9rem;color:var(--muted)}
