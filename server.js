@@ -8,6 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const jobber = require("./jobber");
+const booking = require("./booking");
 
 const PORT = process.env.PORT || 3000;
 const PASSWORD = process.env.SITE_PASSWORD || "";
@@ -101,7 +102,7 @@ function reply(res, status, body, type) {
 
 // Save a small JSON post to requests.log and print it in the terminal
 // (on a host like Render, the terminal output shows up in the Logs tab).
-function saveJson(req, res, type, describe) {
+function saveJson(req, res, type, describe, after) {
   const chunks = [];
   let size = 0;
   req.on("data", (chunk) => {
@@ -121,6 +122,7 @@ function saveJson(req, res, type, describe) {
       try { logSize = fs.statSync(LOG).size; } catch (e) {}
       if (logSize < MAX_LOG_BYTES) fs.appendFileSync(LOG, line + "\n");
       console.log(describe(r));
+      if (after) Promise.resolve().then(() => after(r)).then((m) => console.log("Jobber: " + m), (e) => console.log("Jobber error: " + e.message));
       reply(res, 200, '{"ok":true}', "application/json");
     } catch (e) {
       reply(res, 400, '{"ok":false}', "application/json");
@@ -165,16 +167,16 @@ const server = http.createServer((req, res) => {
     // New booking details. This is the spot to call Jobber later.
     if (req.url === "/api/request") {
       return saveJson(req, res, "request", (r) =>
-        "New booking: " + [r.service, r.name, r.phone, r.address, r.note].filter(Boolean).join(" | "));
+        "New booking: " + [r.service, r.name, r.phone, r.address, r.note].filter(Boolean).join(" | "), (r) => booking.rememberLead(r));
     }
     // The day and arrival window the customer picked.
     if (req.url === "/api/schedule") {
-      return saveJson(req, res, "schedule", (r) => "Time picked for " + r.phone + ": " + r.date + ", " + r.slot);
+      return saveJson(req, res, "schedule", (r) => "Time picked for " + r.phone + ": " + r.date + ", " + r.slot, (r) => booking.bookTime(r));
     }
     // How the customer wants updates (text or email).
     if (req.url === "/api/prefs") {
       return saveJson(req, res, "prefs", (r) =>
-        "Updates for " + r.phone + ": by " + r.channel + (r.email ? " (" + r.email + ")" : ""));
+        "Updates for " + r.phone + ": by " + r.channel + (r.email ? " (" + r.email + ")" : ""), (r) => booking.updatePrefs(r));
     }
     return reply(res, 404, "Not found");
   }
