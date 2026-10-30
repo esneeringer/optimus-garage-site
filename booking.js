@@ -189,7 +189,7 @@ async function availability(from, to) {
   const key = from + "|" + to;
   if (avCache.key === key && Date.now() - avCache.at < 30000) return avCache.val;
   const d = await jobber.gql(
-    `query($f: ISO8601DateTime!, $t: ISO8601DateTime!){ scheduledItems(first: 100, filter:{ occursWithin:{ startAt:$f, endAt:$t } }){ nodes{ startAt endAt allDay } } }`,
+    `query($f: ISO8601DateTime!, $t: ISO8601DateTime!){ scheduledItems(first: 100, filter:{ includeUnassigned: true, occursWithin:{ startAt:$f, endAt:$t } }){ nodes{ startAt endAt allDay } } }`,
     { f: from + "T00:00:00-05:00", t: to + "T23:59:59-04:00" }
   );
   const counts = {};
