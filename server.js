@@ -63,15 +63,34 @@ function clientIp(req) {
   return (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || req.socket.remoteAddress || "unknown";
 }
 
-// Password check (HTTP Basic: any username, the right password).
-function allowed(req) {
-  if (!PASSWORD) return true;
-  const header = req.headers.authorization || "";
-  if (header.slice(0, 6) !== "Basic ") return false;
-  const given = Buffer.from(header.slice(6), "base64").toString().split(":").slice(1).join(":");
+// Password check. Either a login cookie (set by the /login page) or HTTP Basic works.
+const TOKEN = PASSWORD ? crypto.createHmac("sha256", PASSWORD).update("optimus-garage-login").digest("hex") : "";
+function hasCookie(req) {
+  const m = /(?:^|;\s*)og_auth=([a-f0-9]+)/.exec(req.headers.cookie || "");
+  if (!m || m[1].length !== TOKEN.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(m[1]), Buffer.from(TOKEN));
+}
+function samePassword(given) {
   const a = Buffer.from(given);
   const b = Buffer.from(PASSWORD);
   return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+function allowed(req) {
+  if (!PASSWORD) return true;
+  if (hasCookie(req)) return true;
+  const header = req.headers.authorization || "";
+  if (header.slice(0, 6) !== "Basic ") return false;
+  return samePassword(Buffer.from(header.slice(6), "base64").toString().split(":").slice(1).join(":"));
+}
+function loginPage(bad) {
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Optimus Garage Company</title>
+<style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#F3F8FC;color:#0A1A3A;font:500 17px system-ui,sans-serif}
+form{width:min(340px,86vw)}h1{font:900 2rem/1 Arial Narrow,Impact,sans-serif;text-transform:uppercase;margin:0 0 6px}p{margin:0 0 16px;color:#4B5668}
+input,button{box-sizing:border-box;width:100%;font:inherit;padding:14px;border:3px solid #0A1A3A;margin-bottom:12px}
+button{background:#F5CB45;font-weight:800;text-transform:uppercase;cursor:pointer;box-shadow:0 5px 0 #0A1A3A}button:active{transform:translateY(5px);box-shadow:none}
+.e{color:#C0352C;font-weight:700}</style></head><body><form method="post" action="/login"><h1>Optimus Garage Company</h1>
+<p>Private preview. Enter the password.</p>${bad ? '<p class="e">That password was not right.</p>' : ""}
+<input type="password" name="password" placeholder="Password" autocomplete="current-password" autofocus required><button>Enter</button></form></body></html>`;
 }
 
 function reply(res, status, body, type) {
@@ -119,8 +138,24 @@ const server = http.createServer((req, res) => {
 
   if (LOCKED) return reply(res, 503, "This site is locked until a password is set (SITE_PASSWORD).");
 
+  if (req.url === "/login" && req.method === "POST") {
+    if (tooMany(clientIp(req))) return reply(res, 429, "Too many tries. Wait a few minutes.");
+    let body = "";
+    req.on("data", (c) => { body += c; if (body.length > 2000) req.destroy(); });
+    req.on("end", () => {
+      const given = new URLSearchParams(body).get("password") || "";
+      if (!samePassword(given)) return reply(res, 401, loginPage(true), "text/html; charset=utf-8");
+      const secure = req.headers["x-forwarded-proto"] === "https" ? "; Secure" : "";
+      res.writeHead(303, { Location: "/", "Set-Cookie": "og_auth=" + TOKEN + "; Path=/; HttpOnly; SameSite=Lax; Max-Age=2592000" + secure });
+      res.end();
+    });
+    return;
+  }
+
   if (!allowed(req)) {
-    res.setHeader("WWW-Authenticate", 'Basic realm="Optimus Garage preview", charset="UTF-8"');
+    if (req.method === "GET" && !req.url.startsWith("/api/")) {
+      return reply(res, 401, loginPage(false), "text/html; charset=utf-8");
+    }
     return reply(res, 401, "Password needed.");
   }
 
