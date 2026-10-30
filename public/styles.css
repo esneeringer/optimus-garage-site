@@ -65,15 +65,15 @@ section h2{margin-bottom:6px}
 
 /* services */
 .svc{display:grid;gap:12px}
-.svc button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px;border:3px solid var(--line);background:var(--surface);box-shadow:0 6px 0 var(--line);transition:transform .06s,box-shadow .06s;touch-action:manipulation;min-height:72px}
-.svc button:active,.svc button.hit{transform:translateY(6px);box-shadow:0 0 0 var(--line)}
+.svc button{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:14px;padding:16px;border:3px solid var(--ink);background:var(--surface);box-shadow:0 6px 0 var(--ink);transition:transform .06s,box-shadow .06s;touch-action:manipulation;min-height:72px}
+.svc button:active,.svc button.hit{transform:translateY(6px);box-shadow:0 0 0 var(--ink)}
 .svc button:focus-visible{outline:4px solid var(--accent-text);outline-offset:3px}
 .svc .ic{flex:none;width:46px;height:46px;background:var(--blue);color:var(--on-blue);display:grid;place-items:center;font-size:1.5rem;border:3px solid var(--line)}
 
 
-.svc button:nth-child(4) .ic{background:var(--ink);color:var(--bg)}
+
 .svc small{display:block;color:var(--muted);font-weight:500;font-size:.95rem}
-.svc .go{margin-left:auto;font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:1.1rem;color:var(--accent-text)}
+.svc .go{margin-left:auto;font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:1.1rem;color:var(--on-gold);background:var(--gold);border:2px solid var(--ink);padding:7px 10px;letter-spacing:.04em}
 
 /* steps */
 .steps{list-style:none;padding:0;margin:0;display:grid;gap:0;border-left:6px solid var(--blue);margin-left:6px}
