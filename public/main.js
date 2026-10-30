@@ -256,15 +256,15 @@ $("#seeupd").addEventListener("click",function(){
     return post("/api/prefs",{phone:req.phone,channel:channel,email:req.email,t:(req.track.split("/t/")[1]||"")});
   }).then(function(){
     if(req.track){ location.href=req.track; return; } /* the customer's own live tracking page */
-    btn.disabled=false; closeSheet(); openTrack(0); startPoll();
+    btn.disabled=false; closeSheet(); openTrack(1); startPoll();
   });
 });
 
 /* ---------- customer tracker (what the update link opens) ---------- */
 function whenText(){return req.when||"Tomorrow · 2–4 PM"}
 var STEPS=[
-  {t:"Request received", big:function(){return whenText()}, sub:function(v){return "We’ll "+v+" you to confirm within 15 minutes."}},
-  {t:"Time confirmed",   big:function(){return whenText()}, sub:function(v){return "We’ll "+v+" you when we’re on the way."}},
+  {t:"You’re booked", big:function(){return whenText()}, sub:function(v){return "We’ll "+v+" you when we’re on the way."}},
+  {t:"You’re booked", big:function(){return whenText()}, sub:function(v){return "We’ll "+v+" you when we’re on the way."}},
   {t:"We’re on the way", big:function(){return "About 20 min away"}, sub:function(){return "Arriving in your "+(req.slot||"2–4 PM")+" window. Tap call if you need us."}},
   {t:"All done",         big:function(){return "Visit complete"}, sub:function(){return "Thanks for choosing us. Tap call if you need anything."}}
 ];
@@ -298,7 +298,7 @@ function pollStatus(){
   }).catch(function(){});
 }
 var live=0;
-function startPoll(){ stopPoll(); live=0; pollStatus(); poller=setInterval(pollStatus,15000); }
+function startPoll(){ stopPoll(); live=1; pollStatus(); poller=setInterval(pollStatus,15000); }
 function closeTrack(){stopPoll();track.classList.remove("open");track.setAttribute("aria-hidden","true");lockScroll(false)}
 $("#tk-close").addEventListener("click",closeTrack);
 $$("#tk-demo .chip").forEach(function(c,k){c.addEventListener("click",function(){showStep(k)})});

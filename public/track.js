@@ -4,8 +4,8 @@
   var token=decodeURIComponent(location.pathname.split("/t/")[1]||"");
   var PHONE="+15555550123", cur=-1, info={};
   var STEPS=[
-    {t:"Request received", sub:"Tap the confirm link in your text or email to lock in your time."},
-    {t:"Time confirmed",   sub:"You’re all set. We’ll text you when we’re on the way."},
+    {t:"You’re booked", sub:"Your time is reserved. We’ll text you when we’re on the way."},
+    {t:"You’re booked",   sub:"Your time is reserved. We’ll text you when we’re on the way."},
     {t:"We’re on the way", sub:"Tap call if you need us."},
     {t:"All done",         sub:"Thanks for choosing us. Tap call if you need anything."}
   ];
@@ -38,7 +38,7 @@
       }
       $("#tk-act").style.display = s.step>=3 ? "none" : "";
       var rv=$("#tk-review"); if(s.step>=3 && s.review){rv.href=s.review; rv.style.display="block"}
-      if(s.step!==cur) show(s.step);
+      var stp=Math.max(s.step,1); if(stp!==cur) show(stp);
     }).catch(function(){});
   }
   /* ---- change time / cancel ---- */
@@ -64,7 +64,7 @@
     say("Changing…");
     fetch("/api/track/"+encodeURIComponent(token)+"/reschedule",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({date:dt.value,slot:sel.value})})
       .then(function(r){return r.json()}).then(function(j){
-        if(j&&j.ok){ say("Done. Your new time is saved. Please confirm it again with the link in your text."); location.replace("/t/"+j.token); }
+        if(j&&j.ok){ say("Done. Your new time is saved."); location.replace("/t/"+j.token); }
         else say((j&&j.error)||"Couldn’t change it. Please call us.",true);
       }).catch(function(){say("Couldn’t change it. Please call us.",true)});
   });

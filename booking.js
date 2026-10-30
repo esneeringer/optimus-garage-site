@@ -135,11 +135,11 @@ async function updatePrefs(p) {
     const what = String(b.service || "service").toLowerCase() + " visit (" + nice + ", " + b.slot + ")";
     try {
       if (p.channel === "text") {
-        texted = " | " + await sms.send(b.phone, "Optimus Garage: CONFIRM your " + what + " here: " + link + "  Reply STOP to opt out.");
+        texted = " | " + await sms.send(b.phone, "Optimus Garage: you're booked! " + what.charAt(0).toUpperCase() + what.slice(1) + ". Follow it live: " + link + "  Reply STOP to opt out.");
       } else {
-        texted = " | " + await mail.send(p.email, "Please confirm your visit with Optimus Garage",
-          "Please CONFIRM your " + what + " by tapping this link, then the big Confirm button:\n\n" + link + "\n\nThanks,\nOptimus Garage Company",
-          "<p><strong>Please CONFIRM your " + what + ".</strong></p><p><a href=\"" + link + "\" style=\"display:inline-block;background:#F5CB45;color:#0A1A3A;font-weight:800;padding:14px 22px;border:3px solid #0A1A3A;text-decoration:none\">Confirm my appointment</a></p><p>Or paste this into your browser:<br>" + link + "</p><p>Thanks,<br>Optimus Garage Company</p>");
+        texted = " | " + await mail.send(p.email, "You're booked with Optimus Garage",
+          "You're booked: " + what + ". Follow your appointment live here:\n\n" + link + "\n\nThanks,\nOptimus Garage Company",
+          "<p><strong>You're booked: " + what + ".</strong></p><p><a href=\"" + link + "\" style=\"display:inline-block;background:#F5CB45;color:#0A1A3A;font-weight:800;padding:14px 22px;border:3px solid #0A1A3A;text-decoration:none\">Follow my appointment</a></p><p>Or paste this into your browser:<br>" + link + "</p><p>Thanks,<br>Optimus Garage Company</p>");
       }
     } catch (e) { texted = " | message failed: " + e.message; }
   }
@@ -161,8 +161,7 @@ async function statusOf(requestId) {
     { id: requestId }
   );
   const a = (d.request && d.request.assessment) || {};
-  let step = 0;
-  if (a.clientConfirmed) step = 1;
+  let step = 1; // booked = confirmed: the customer picked a real open window
   if (a.isComplete) step = 3;
   const cancelled = /^CANCELLED/.test((d.request && d.request.title) || "");
   return { known: true, cancelled, step, startAt: a.startAt || null, endAt: a.endAt || null, confirmed: !!a.clientConfirmed, complete: !!a.isComplete };
