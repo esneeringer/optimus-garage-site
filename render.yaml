@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: optimus-garage-site
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: SITE_PASSWORD
+        sync: false # Render asks you to type this in when you create the service
