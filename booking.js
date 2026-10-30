@@ -52,7 +52,7 @@ async function bookTime(s) {
   const firstName = names[0];
   const lastName = names.slice(1).join(" ") || "-";
   const created = await jobber.gql(
-    `mutation($input: ClientCreateInput!){ clientCreate(input:$input){ client{ id phones{ id } properties{ id } } userErrors{ message path } } }`,
+    `mutation($input: ClientCreateInput!){ clientCreate(input:$input){ client{ id phones{ id } clientProperties{ nodes{ id } } } userErrors{ message path } } }`,
     { input: {
         firstName, lastName,
         phones: [{ number: lead.phone, description: "MOBILE", primary: true, smsAllowed: false }],
@@ -63,7 +63,7 @@ async function bookTime(s) {
   const cc = created.clientCreate;
   if (cc.userErrors && cc.userErrors.length) throw new Error("clientCreate: " + cc.userErrors.map((e) => e.message).join("; "));
   const client = cc.client;
-  const propertyId = client.properties && client.properties.nodes ? client.properties.nodes[0].id : (client.properties[0] || {}).id;
+  const propertyId = client.clientProperties.nodes[0].id;
 
   const at = (time) => ({ date: s.date, time, timezone: TIMEZONE });
   const req = await jobber.gql(
