@@ -36,11 +36,46 @@
     <button data-book data-svc="New door install"><span class="ic">🚪</span><span><strong>New door install<em class="price">From $1,099 installed</em></strong><small>Free on-site estimate, price locked in</small></span><span class="go">BOOK</span></button>
     <button data-book data-svc="Not sure, help me"><span class="ic">❓</span><span><strong>I don’t know. Please help.</strong><small>Tell us what’s going on and we’ll sort it out</small></span><span class="go">BOOK</span></button>
   </div>
+  <a class="sos" href="tel:+15555550123"><span class="sos-ic" aria-hidden="true">🚨</span><span><strong>Door stuck open or car trapped?</strong><small>Tap to call us now: (555) 555-0123</small></span></a>
 </div>
 
 <div class="trust"><ul>
   <li>Same-day visits</li><li>Licensed &amp; insured</li><li>Upfront pricing</li><li>Work guaranteed</li>
 </ul></div>
+
+<section id="estimate"><div class="wrap">
+  <h2>Quick price estimate</h2>
+  <p class="lead">Pick what you’re after. Final price is confirmed at your free on-site measure.</p>
+  <div class="est">
+    <div class="chips" id="est-what" role="group" aria-label="What are you pricing">
+      <button class="chip" aria-pressed="true" data-w="door">New door</button>
+      <button class="chip" aria-pressed="false" data-w="opener">New opener</button>
+    </div>
+    <div id="est-door">
+      <p class="est-l">Size</p>
+      <div class="chips" id="est-size" role="group" aria-label="Door size">
+        <button class="chip" aria-pressed="true" data-i="0">Single (8–9 ft)</button>
+        <button class="chip" aria-pressed="false" data-i="1">Double (16 ft)</button>
+      </div>
+      <p class="est-l">Style</p>
+      <div class="chips" id="est-style" role="group" aria-label="Door style">
+        <button class="chip" aria-pressed="true" data-i="0">Standard steel</button>
+        <button class="chip" aria-pressed="false" data-i="1">Insulated steel</button>
+        <button class="chip" aria-pressed="false" data-i="2">Carriage-house</button>
+      </div>
+    </div>
+    <div id="est-opener" style="display:none">
+      <p class="est-l">Drive type</p>
+      <div class="chips" id="est-drive" role="group" aria-label="Opener type">
+        <button class="chip" aria-pressed="true" data-i="0">Chain drive</button>
+        <button class="chip" aria-pressed="false" data-i="1">Quiet belt drive</button>
+        <button class="chip" aria-pressed="false" data-i="2">Smart Wi-Fi belt</button>
+      </div>
+    </div>
+    <div class="est-out"><span id="est-price">$1,099</span><small id="est-note">installed, old door hauled away</small></div>
+    <button class="slam" id="est-book">Book a free estimate</button>
+  </div>
+</div></section>
 
 <section><div class="wrap">
   <h2>How it works</h2>
@@ -109,6 +144,12 @@
       <input id="ad" aria-label="Service address" autocomplete="street-address" placeholder="e.g. 412 Frederick Rd" aria-describedby="e-ad">
       <span class="tag" aria-hidden="true">Address</span>
       <p class="err" id="e-ad" role="alert"></p>
+      <p class="zipnote" id="zipnote" role="status"></p>
+    </div>
+    <div class="photos" id="f-ph">
+      <label class="chip addph" for="ph-in">📷 Add photos <em>Optional</em></label>
+      <input id="ph-in" type="file" accept="image/*" multiple hidden>
+      <div id="ph-th" class="ph-th"></div>
     </div>
     <button class="slam" id="send">Book a Time</button>
   </div>

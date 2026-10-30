@@ -14,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 const PASSWORD = process.env.SITE_PASSWORD || "";
 // On a hosting service (Render sets RENDER=true), stay locked until a password is set.
 const LOCKED = !!process.env.RENDER && !PASSWORD;
+const photos = require("./photos");
 const PUBLIC = path.join(__dirname, "public");
 const LOG = path.join(__dirname, "requests.log");
 const MAX_LOG_BYTES = 5 * 1024 * 1024;
@@ -31,8 +32,8 @@ const TYPES = {
 // What each kind of post may contain, and the longest each field can be.
 const SHAPES = {
   request: { service: 40, name: 80, phone: 30, address: 200, note: 500, email: 120, date: 10, slot: 20, when: 60 },
-  prefs: { phone: 30, channel: 10, email: 120 },
-  schedule: { phone: 30, date: 10, slot: 20 },
+  prefs: { phone: 30, channel: 10, email: 120, t: 1500 },
+  schedule: { phone: 30, date: 10, slot: 20, photos: 120 },
 };
 // The fields that must be filled in for a post to be accepted.
 const VALID = {
@@ -137,6 +138,15 @@ function saveJson(req, res, type, describe, after, wait) {
   });
 }
 
+
+// Read a small JSON body, then call back with the parsed object (or null).
+function readJson(req, max, cb) {
+  const chunks = []; let size = 0, dead = false;
+  req.on("data", (c) => { size += c.length; if (size > max) { dead = true; req.destroy(); } else chunks.push(c); });
+  req.on("end", () => { if (dead) return; let o = null; try { o = JSON.parse(Buffer.concat(chunks).toString()); } catch (e) {} cb(o); });
+}
+const json = (res, code, obj) => reply(res, code, JSON.stringify(obj), "application/json");
+
 const server = http.createServer((req, res) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Robots-Tag", "noindex, nofollow");
@@ -174,6 +184,34 @@ const server = http.createServer((req, res) => {
     );
     return;
   }
+  // Photos Jobber fetches (random, short-lived links).
+  const pm = /^\/p\/([a-f0-9]{24})\.(?:jpg|png|webp)$/.exec(pubPath);
+  if (req.method === "GET" && pm) {
+    const p = photos.get(pm[1]);
+    if (!p) return reply(res, 404, "Gone");
+    res.writeHead(200, { "Content-Type": p.type, "Cache-Control": "private, max-age=600" });
+    return res.end(p.buf);
+  }
+  // Open slots (only says which windows are taken, nothing private).
+  if (req.method === "GET" && pubPath === "/api/availability") {
+    const u = new URL(req.url, "http://x");
+    const f = u.searchParams.get("from") || "", t = u.searchParams.get("to") || "";
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(f) || !/^\d{4}-\d{2}-\d{2}$/.test(t)) return json(res, 400, { ok: false });
+    booking.availability(f, t).then((r) => json(res, 200, r), (e) => { console.log("Jobber availability error: " + e.message); json(res, 200, { ok: false }); });
+    return;
+  }
+  // Change or cancel from the tracking page.
+  const am = /^\/api\/track\/([^/]+)\/(reschedule|cancel)$/.exec(pubPath);
+  if (req.method === "POST" && am) {
+    if (tooMany(clientIp(req))) return json(res, 429, { ok: false });
+    const tok = decodeURIComponent(am[1]);
+    readJson(req, 2000, (o) => {
+      const run = am[2] === "cancel" ? booking.cancel(tok) : booking.reschedule(tok, String((o && o.date) || ""), String((o && o.slot) || ""));
+      run.then((r) => { console.log("Jobber: customer " + am[2] + " -> " + JSON.stringify(r).slice(0, 80)); json(res, 200, r); },
+        (e) => { console.log("Jobber " + am[2] + " error: " + e.message); json(res, 200, { ok: false, error: "Something went wrong. Please call us." }); });
+    });
+    return;
+  }
   const PUBLIC_ASSETS = ["/styles.css", "/logo.svg", "/track.js"];
   if (!allowed(req) && req.method === "GET" && PUBLIC_ASSETS.includes(pubPath)) { /* fall through to static */ }
   else if (!allowed(req)) {
@@ -185,6 +223,12 @@ const server = http.createServer((req, res) => {
 
   if (req.method === "POST") {
     if (tooMany(clientIp(req))) return reply(res, 429, '{"ok":false}', "application/json");
+    if (req.url === "/api/photo") {
+      return readJson(req, 3.5 * 1024 * 1024, (o) => {
+        const id = o && photos.add(o.data);
+        json(res, id ? 200 : 400, id ? { ok: true, id } : { ok: false });
+      });
+    }
     // New booking details. This is the spot to call Jobber later.
     if (req.url === "/api/request") {
       return saveJson(req, res, "request", (r) =>
@@ -238,6 +282,17 @@ const server = http.createServer((req, res) => {
         },
         (e) => { console.log("Jobber connect failed: " + e.message); page("Could not connect", "<p>" + String(e.message).replace(/[<>&]/g, "") + "</p>"); }
       );
+      return;
+    }
+    if (u.pathname === "/jobber/setup-services") {
+      // One-time: add our four priced services to Jobber (same prices as the site). Run with ?go=1.
+      if (!jobber.connected()) return page("Not connected", "<p>Connect first.</p>");
+      const list = [["Door repair", 129, "Service call and repair of an off-track, stuck, loud or crooked door."], ["Spring replacement", 189, "Per spring, including cable check."], ["Opener install", 299, "New opener installed with remotes and keypad setup."], ["New door install", 1099, "Starting price for a new door, installed. Free on-site estimate."]];
+      if (u.searchParams.get("go") !== "1") return page("Add services", "<p>This adds: " + list.map((x) => x[0] + " ($" + x[1] + ")").join(", ") + ".</p><p><a href='/jobber/setup-services?go=1'>Add them now</a></p>");
+      Promise.all(list.map(([name, price, description]) => jobber.gql(
+        `mutation($input: ProductsAndServicesInput!){ productsAndServicesCreate(input:$input){ productOrService{ id name } userErrors{ message } } }`,
+        { input: { name, defaultUnitCost: price, description, category: "SERVICE", taxable: false } }
+      ).then((d) => name + ": " + JSON.stringify(d.productsAndServicesCreate), (e) => name + ": ERROR " + e.message))).then((r) => page("Services added", "<pre>" + r.join("\n").replace(/[<>&]/g, "") + "</pre>"));
       return;
     }
     if (u.pathname === "/jobber/schema") {

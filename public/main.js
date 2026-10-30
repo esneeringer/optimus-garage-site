@@ -140,7 +140,15 @@ function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate
 function parseIso(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
 function label(d){return d.toLocaleDateString("en-US",{weekday:"short",month:"short",day:"numeric"})}
 function today0(){var n=new Date();return new Date(n.getFullYear(),n.getMonth(),n.getDate())}
-function busy(d,i){var n=d.getFullYear()*372+d.getMonth()*31+d.getDate();return (n*7+i*13)%10<2}
+var AV=null; /* real availability from Jobber: {"2026-11-02":[0,2]} = windows taken. null = not loaded (demo mode). */
+function loadAvail(cb){
+  var t0=today0(), last=new Date(t0); last.setDate(last.getDate()+BIZ.ahead);
+  fetch("/api/availability?from="+iso(t0)+"&to="+iso(last)).then(function(r){return r.json()}).then(function(j){
+    AV = j&&j.ok ? j.taken : null; cb&&cb();
+  }).catch(function(){AV=null; cb&&cb()});
+}
+function busy(d,i){
+  if(AV) return (AV[iso(d)]||[]).indexOf(i)>-1;var n=d.getFullYear()*372+d.getMonth()*31+d.getDate();return (n*7+i*13)%10<2}
 function winOpen(d,i){
   var start=new Date(d.getFullYear(),d.getMonth(),d.getDate(),BIZ.windows[i].h);
   return (start-new Date())>=BIZ.lead*36e5 && !busy(d,i);
@@ -195,6 +203,10 @@ function openWhen(){
   $("#when-sum").textContent=req.service+" · "+req.address;
   renderCal(); renderSlots(); updatePick();
   screen("when");
+  loadAvail(function(){
+    if(pick.date && !dayOpen(parseIso(pick.date))){ var f=firstOpenDay(); pick={date:iso(f),slot:null}; cal={y:f.getFullYear(),m:f.getMonth()}; }
+    renderCal(); renderSlots(); updatePick();
+  });
 }
 $("#back").addEventListener("click",function(){screen("form")});
 $("#cal-prev").addEventListener("click",function(){cal.m--; if(cal.m<0){cal.m=11;cal.y--} renderCal()});
@@ -216,7 +228,7 @@ $("#lock").addEventListener("click",function(){
   if(!pick.slot) return;
   req.date=pick.date; req.slot=pick.slot; req.when=label(parseIso(pick.date))+" · "+pick.slot;
   req.track="";
-  req.saving=fetch("/api/schedule",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone:req.phone,date:req.date,slot:req.slot})})
+  req.saving=fetch("/api/schedule",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone:req.phone,date:req.date,slot:req.slot,photos:photoIds.join(",")})})
     .then(function(r){return r.json()}).then(function(j){req.track=(j&&j.track)||""}).catch(function(){});
   if(JOBBER_REQUEST_URL){
     var u=JOBBER_REQUEST_URL+(JOBBER_REQUEST_URL.indexOf("?")>-1?"&":"?")+"service="+encodeURIComponent(service)+"&date="+encodeURIComponent(req.date)+"&window="+encodeURIComponent(req.slot);
@@ -241,7 +253,7 @@ $("#seeupd").addEventListener("click",function(){
   req.email = channel==="email" ? em.value.trim() : "";
   var btn=$("#seeupd"); btn.disabled=true;
   Promise.resolve(req.saving).then(function(){
-    return post("/api/prefs",{phone:req.phone,channel:channel,email:req.email});
+    return post("/api/prefs",{phone:req.phone,channel:channel,email:req.email,t:(req.track.split("/t/")[1]||"")});
   }).then(function(){
     if(req.track){ location.href=req.track; return; } /* the customer's own live tracking page */
     btn.disabled=false; closeSheet(); openTrack(0); startPoll();
@@ -298,3 +310,69 @@ document.addEventListener("keydown",function(e){
 /* Direct link for previews: yoursite/#track, or #track3 to jump to step 3 */
 var m=/^#track([1-4])?$/.exec(location.hash||"");
 if(m) openTrack(m[1]?parseInt(m[1],10)-1:0);
+
+
+/* ---------- photos: shrink on the phone, then upload ---------- */
+var photoIds=[];
+function shrink(file,cb){
+  var img=new Image(), url=URL.createObjectURL(file);
+  img.onload=function(){
+    var s=Math.min(1,1280/Math.max(img.width,img.height)), c=document.createElement("canvas");
+    c.width=Math.round(img.width*s); c.height=Math.round(img.height*s);
+    c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+    URL.revokeObjectURL(url); cb(c.toDataURL("image/jpeg",0.72));
+  };
+  img.onerror=function(){URL.revokeObjectURL(url); cb(null)};
+  img.src=url;
+}
+$("#ph-in").addEventListener("change",function(e){
+  var files=[].slice.call(e.target.files).slice(0,3-photoIds.length); e.target.value="";
+  files.forEach(function(f){
+    shrink(f,function(data){
+      if(!data) return;
+      var th=document.createElement("span"); th.className="up"; th.style.backgroundImage="url("+data+")";
+      $("#ph-th").appendChild(th);
+      fetch("/api/photo",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({data:data})})
+        .then(function(r){return r.json()}).then(function(j){
+          if(!j||!j.id){th.remove();return}
+          photoIds.push(j.id); th.className="";
+          var x=document.createElement("b"); x.textContent="×"; x.setAttribute("aria-label","Remove photo");
+          x.onclick=function(){photoIds=photoIds.filter(function(i){return i!==j.id}); th.remove()};
+          th.appendChild(x);
+        }).catch(function(){th.remove()});
+    });
+  });
+});
+
+/* ---------- service area check (we still take the request either way) ---------- */
+var ZIPS=["21228","21250","21227","21229","21207","21244","21043","21042","21075","21133","21223","21216","21215"];
+$("#ad").addEventListener("input",function(){
+  var z=(/\b(\d{5})\b/.exec(this.value)||[])[1], n=$("#zipnote");
+  if(z && ZIPS.indexOf(z)<0){ n.textContent="That ZIP looks a little outside our usual area. You can still book and we’ll call to confirm."; n.className="zipnote on"; }
+  else if(z){ n.textContent="Great, you’re in our service area."; n.className="zipnote on"; }
+  else n.className="zipnote";
+});
+
+/* ---------- price estimator ---------- */
+var EST={
+  door:[[1099,1399,1799],[1499,1899,2499]],   /* [size][style] installed, old door hauled away */
+  opener:[299,379,449]
+};
+var est={w:"door",size:0,style:0,drive:0};
+function money(n){return "$"+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",")}
+function paintEst(){
+  var p = est.w==="door" ? EST.door[est.size][est.style] : EST.opener[est.drive];
+  $("#est-price").textContent=money(p);
+  $("#est-note").textContent = est.w==="door" ? "installed, old door hauled away" : "installed, remotes and keypad set up";
+  $("#est-door").style.display = est.w==="door" ? "" : "none";
+  $("#est-opener").style.display = est.w==="opener" ? "" : "none";
+}
+function pickGroup(id,key,num){
+  $$(id+" .chip").forEach(function(c){c.addEventListener("click",function(){
+    est[key] = num ? +c.dataset.i : c.dataset.w;
+    $$(id+" .chip").forEach(function(x){x.setAttribute("aria-pressed",x===c?"true":"false")});
+    paintEst();
+  })});
+}
+pickGroup("#est-what","w",false); pickGroup("#est-size","size",true); pickGroup("#est-style","style",true); pickGroup("#est-drive","drive",true);
+$("#est-book").addEventListener("click",function(){openSheet(est.w==="door"?"New door install":"Opener install")});
