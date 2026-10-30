@@ -102,7 +102,7 @@ function reply(res, status, body, type) {
 
 // Save a small JSON post to requests.log and print it in the terminal
 // (on a host like Render, the terminal output shows up in the Logs tab).
-function saveJson(req, res, type, describe, after) {
+function saveJson(req, res, type, describe, after, wait) {
   const chunks = [];
   let size = 0;
   req.on("data", (chunk) => {
@@ -122,8 +122,15 @@ function saveJson(req, res, type, describe, after) {
       try { logSize = fs.statSync(LOG).size; } catch (e) {}
       if (logSize < MAX_LOG_BYTES) fs.appendFileSync(LOG, line + "\n");
       console.log(describe(r));
-      if (after) Promise.resolve().then(() => after(r)).then((m) => console.log("Jobber: " + m), (e) => console.log("Jobber error: " + e.message));
-      reply(res, 200, '{"ok":true}', "application/json");
+      const job = after ? Promise.resolve().then(() => after(r)).then(
+        (m) => { console.log("Jobber: " + (m && m.log ? m.log : m)); return m; },
+        (e) => { console.log("Jobber error: " + e.message); }
+      ) : Promise.resolve();
+      if (!wait) return reply(res, 200, '{"ok":true}', "application/json");
+      job.then((m) => {
+        const base = (req.headers["x-forwarded-proto"] === "https" ? "https://" : "http://") + req.headers.host;
+        reply(res, 200, JSON.stringify({ ok: true, track: m && m.token ? base + "/t/" + m.token : "" }), "application/json");
+      });
     } catch (e) {
       reply(res, 400, '{"ok":false}', "application/json");
     }
@@ -155,7 +162,21 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (!allowed(req)) {
+  // Customer tracking page: reached by a signed link, so no site password.
+  const pubPath = req.url.split("?")[0];
+  if (req.method === "GET" && pubPath.startsWith("/t/")) {
+    return fs.readFile(path.join(PUBLIC, "track.html"), (e, d) => reply(res, e ? 500 : 200, e ? "Error" : d, "text/html; charset=utf-8"));
+  }
+  if (req.method === "GET" && pubPath.startsWith("/api/track/")) {
+    booking.statusByToken(decodeURIComponent(pubPath.slice(11))).then(
+      (r) => reply(res, 200, JSON.stringify(r), "application/json"),
+      (e) => { console.log("Jobber track error: " + e.message); reply(res, 200, '{"known":false}', "application/json"); }
+    );
+    return;
+  }
+  const PUBLIC_ASSETS = ["/styles.css", "/logo.svg", "/track.js"];
+  if (!allowed(req) && req.method === "GET" && PUBLIC_ASSETS.includes(pubPath)) { /* fall through to static */ }
+  else if (!allowed(req)) {
     if (req.method === "GET" && !req.url.startsWith("/api/")) {
       return reply(res, 401, loginPage(false), "text/html; charset=utf-8");
     }
@@ -171,7 +192,7 @@ const server = http.createServer((req, res) => {
     }
     // The day and arrival window the customer picked.
     if (req.url === "/api/schedule") {
-      return saveJson(req, res, "schedule", (r) => "Time picked for " + r.phone + ": " + r.date + ", " + r.slot, (r) => booking.bookTime(r));
+      return saveJson(req, res, "schedule", (r) => "Time picked for " + r.phone + ": " + r.date + ", " + r.slot, (r) => booking.bookTime(r), true);
     }
     // How the customer wants updates (text or email).
     if (req.url === "/api/prefs") {

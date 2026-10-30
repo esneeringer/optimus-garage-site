@@ -1,6 +1,20 @@
 // Turns website bookings into Jobber records: client + address, then a request with a scheduled assessment.
 // Does nothing (and never breaks the site) when Jobber is not connected.
+const crypto = require("crypto");
 const jobber = require("./jobber");
+
+// Tracking links are signed, so they work without a database and survive restarts.
+const SECRET = process.env.TRACK_SECRET || process.env.JOBBER_CLIENT_SECRET || process.env.SITE_PASSWORD || "dev-only";
+const sign = (s) => crypto.createHmac("sha256", SECRET).update(s).digest("base64url").slice(0, 22);
+function makeToken(d) {
+  const body = Buffer.from(JSON.stringify(d)).toString("base64url");
+  return body + "." + sign(body);
+}
+function readToken(t) {
+  const [body, sig] = String(t || "").split(".");
+  if (!body || !sig || sig.length !== 22 || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(sign(body)))) return null;
+  try { return JSON.parse(Buffer.from(body, "base64url").toString()); } catch (e) { return null; }
+}
 
 const TIMEZONE = process.env.BIZ_TIMEZONE || "America/New_York";
 const pending = new Map(); // phone digits -> lead details from the first step
@@ -82,7 +96,8 @@ async function bookTime(s) {
   const rc = req.requestCreate;
   if (rc.userErrors && rc.userErrors.length) throw new Error("requestCreate: " + rc.userErrors.map((e) => e.message).join("; "));
   booked.set(key, { requestId: rc.request.id, clientId: client.id, phoneId: client.phones && client.phones[0] ? client.phones[0].id : null });
-  return "created client + request " + rc.request.id + " scheduled " + s.date + " " + win[0] + "-" + win[1];
+  const token = makeToken({ r: rc.request.id, a: lead.address, s: lead.service, d: s.date, w: s.slot });
+  return { log: "created client + request " + rc.request.id + " scheduled " + s.date + " " + win[0] + "-" + win[1], token };
 }
 
 async function updatePrefs(p) {
@@ -104,12 +119,10 @@ async function updatePrefs(p) {
 
 // Where is this customer's appointment right now? Read live from Jobber.
 // step 0 = received, 1 = confirmed by the customer, 3 = assessment finished. (Jobber's API has no "on the way" signal.)
-async function status(phone) {
-  const b = booked.get(digits(phone));
-  if (!b || !b.requestId || !jobber.connected()) return { known: false };
+async function statusOf(requestId) {
   const d = await jobber.gql(
-    `query($id: EncodedId!){ request(id:$id){ id status isScheduled assessment{ startAt endAt clientConfirmed isComplete completedAt } } }`,
-    { id: b.requestId }
+    `query($id: EncodedId!){ request(id:$id){ id assessment{ startAt endAt clientConfirmed isComplete completedAt } } }`,
+    { id: requestId }
   );
   const a = (d.request && d.request.assessment) || {};
   let step = 0;
@@ -117,5 +130,17 @@ async function status(phone) {
   if (a.isComplete) step = 3;
   return { known: true, step, startAt: a.startAt || null, endAt: a.endAt || null, confirmed: !!a.clientConfirmed, complete: !!a.isComplete };
 }
+async function status(phone) {
+  const b = booked.get(digits(phone));
+  if (!b || !b.requestId || !jobber.connected()) return { known: false };
+  return statusOf(b.requestId);
+}
+// Same, for a customer's tracking link. Also returns the details to show on the page.
+async function statusByToken(token) {
+  const t = readToken(token);
+  if (!t || !jobber.connected()) return { known: false };
+  const s = await statusOf(t.r);
+  return { ...s, address: t.a, service: t.s, date: t.d, slot: t.w };
+}
 
-module.exports = { status, rememberLead, bookTime, updatePrefs, parseWindow, parseAddress };
+module.exports = { status, statusByToken, readToken, rememberLead, bookTime, updatePrefs, parseWindow, parseAddress };

@@ -215,7 +215,9 @@ $("#slots").addEventListener("click",function(e){
 $("#lock").addEventListener("click",function(){
   if(!pick.slot) return;
   req.date=pick.date; req.slot=pick.slot; req.when=label(parseIso(pick.date))+" · "+pick.slot;
-  post("/api/schedule",{phone:req.phone,date:req.date,slot:req.slot});
+  req.track="";
+  req.saving=fetch("/api/schedule",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({phone:req.phone,date:req.date,slot:req.slot})})
+    .then(function(r){return r.json()}).then(function(j){req.track=(j&&j.track)||""}).catch(function(){});
   if(JOBBER_REQUEST_URL){
     var u=JOBBER_REQUEST_URL+(JOBBER_REQUEST_URL.indexOf("?")>-1?"&":"?")+"service="+encodeURIComponent(service)+"&date="+encodeURIComponent(req.date)+"&window="+encodeURIComponent(req.slot);
     window.open(u,"_blank","noopener");
@@ -237,10 +239,13 @@ $("#seeupd").addEventListener("click",function(){
   var em=$("#em");
   if(channel==="email" && !validate(["em"])) return;
   req.email = channel==="email" ? em.value.trim() : "";
-  post("/api/prefs",{phone:req.phone,channel:channel,email:req.email});
-  closeSheet();
-  openTrack(0);
-  startPoll();
+  var btn=$("#seeupd"); btn.disabled=true;
+  Promise.resolve(req.saving).then(function(){
+    return post("/api/prefs",{phone:req.phone,channel:channel,email:req.email});
+  }).then(function(){
+    if(req.track){ location.href=req.track; return; } /* the customer's own live tracking page */
+    btn.disabled=false; closeSheet(); openTrack(0); startPoll();
+  });
 });
 
 /* ---------- customer tracker (what the update link opens) ---------- */
