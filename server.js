@@ -189,12 +189,13 @@ const server = http.createServer((req, res) => {
     if (!jobber.configured()) {
       return page("Jobber is not set up yet", "<p>Add JOBBER_CLIENT_ID, JOBBER_CLIENT_SECRET and JOBBER_REDIRECT_URI in the Render environment first.</p>");
     }
-    if (u.pathname === "/jobber/connect") {
+    const comingBack = u.pathname === "/jobber/callback" || (u.pathname === "/jobber/connect" && u.searchParams.has("code"));
+    if (u.pathname === "/jobber/connect" && !comingBack) {
       const state = crypto.randomBytes(16).toString("hex");
       res.writeHead(302, { Location: jobber.authorizeUrl(state), "Set-Cookie": "og_state=" + state + "; Path=/; HttpOnly; SameSite=Lax; Max-Age=600" + (req.headers["x-forwarded-proto"] === "https" ? "; Secure" : "") });
       return res.end();
     }
-    if (u.pathname === "/jobber/callback") {
+    if (comingBack) {
       const m = /(?:^|;\s*)og_state=([a-f0-9]+)/.exec(req.headers.cookie || "");
       if (!m || m[1] !== u.searchParams.get("state") || !u.searchParams.get("code")) return page("Could not connect", "<p>The sign-in did not match. Go back to <a href='/jobber/connect'>/jobber/connect</a> and try again.</p>");
       jobber.exchangeCode(u.searchParams.get("code")).then(
