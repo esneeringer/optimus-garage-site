@@ -26,6 +26,7 @@
 <main>
 <div class="wrap hero">
   
+  <div class="scene" aria-hidden="true"><svg viewBox="0 0 400 140" preserveAspectRatio="xMidYMax meet"><rect x="0" y="126" width="400" height="14" fill="var(--surface)"/><rect x="118" y="126" width="164" height="14" fill="var(--gun)" opacity=".35"/><polygon points="40,52 200,14 360,52" fill="var(--gun)"/><rect x="52" y="52" width="296" height="74" fill="var(--surface)" stroke="var(--line)" stroke-width="3"/><rect x="118" y="68" width="164" height="58" fill="var(--bg)" stroke="var(--line)" stroke-width="3"/><g fill="var(--blue)" stroke="var(--line)" stroke-width="2"><rect x="122" y="72" width="156" height="12"/><rect x="122" y="86" width="156" height="12"/><rect x="122" y="100" width="156" height="12"/><rect x="122" y="114" width="156" height="10"/></g><g fill="var(--bg)" stroke="var(--line)" stroke-width="1.5"><rect x="130" y="75" width="20" height="6"/><rect x="154" y="75" width="20" height="6"/><rect x="178" y="75" width="20" height="6"/><rect x="202" y="75" width="20" height="6"/><rect x="226" y="75" width="20" height="6"/><rect x="250" y="75" width="20" height="6"/></g><rect x="68" y="78" width="34" height="30" fill="var(--bg)" stroke="var(--line)" stroke-width="3"/><rect x="298" y="78" width="34" height="30" fill="var(--bg)" stroke="var(--line)" stroke-width="3"/><rect x="68" y="90" width="34" height="3" fill="var(--line)"/><rect x="298" y="90" width="34" height="3" fill="var(--line)"/><rect x="84" y="78" width="3" height="30" fill="var(--line)"/><rect x="314" y="78" width="3" height="30" fill="var(--line)"/></svg></div>
   <p class="area">📍 Serving Catonsville and nearby</p>
   <h1>How can we help with your garage?</h1>
   <p class="sub">Tap one to start your request. Takes about 30 seconds.</p>
@@ -51,6 +52,7 @@
       <button class="chip" aria-pressed="true" data-w="door">New door</button>
       <button class="chip" aria-pressed="false" data-w="opener">New opener</button>
     </div>
+    <div class="door-pv" id="door-pv" aria-hidden="true"></div>
     <div id="est-door">
       <p class="est-l">Size</p>
       <div class="chips" id="est-size" role="group" aria-label="Door size">
