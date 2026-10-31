@@ -355,32 +355,7 @@ var EST={
 };
 var est={w:"door",size:0,style:0,drive:0};
 function money(n){return "$"+n.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",")}
-function doorSvg(size,style){
-  var W=size?220:130, X=(240-W)/2, ph=[], i, cols=size?4:3, pw=(W-8)/cols;
-  var rows=4, rh=11, y0=22;
-  var g='<svg viewBox="0 0 240 110" role="img"><rect x="'+(X-6)+'" y="12" width="'+(W+12)+'" height="92" fill="var(--gun)" opacity=".55"/><rect x="'+X+'" y="18" width="'+W+'" height="86" fill="var(--bg)" stroke="var(--line)" stroke-width="3"/>';
-  for(i=0;i<4;i++){
-    var y=y0+i*20;
-    g+='<rect x="'+(X+4)+'" y="'+y+'" width="'+(W-8)+'" height="18" fill="'+(style===2?"var(--gun)":"var(--blue)")+'" stroke="var(--line)" stroke-width="2"/>';
-    if(style===0||style===1){
-      for(var c=0;c<cols;c++) g+='<rect x="'+(X+8+c*pw)+'" y="'+(y+4)+'" width="'+(pw-8)+'" height="10" fill="none" stroke="var(--line)" stroke-width="1.2" opacity=".5"/>';
-    }
-    if(style===1 && i===0){
-      for(var w=0;w<cols;w++) g+='<rect x="'+(X+9+w*pw)+'" y="'+(y+3)+'" width="'+(pw-10)+'" height="12" fill="var(--bg)" stroke="var(--line)" stroke-width="1.5"/>';
-    }
-  }
-  if(style===2){
-    for(var k=0;k<cols;k++){
-      var px=X+4+k*(W-8)/cols, pw2=(W-8)/cols;
-      g+='<line x1="'+(px+4)+'" y1="26" x2="'+(px+pw2-4)+'" y2="98" stroke="var(--bg)" stroke-width="2.2" opacity=".7"/><line x1="'+(px+pw2-4)+'" y1="26" x2="'+(px+4)+'" y2="98" stroke="var(--bg)" stroke-width="2.2" opacity=".7"/>';
-    }
-    g+='<circle cx="'+(X+W/2-14)+'" cy="64" r="3" fill="var(--gold)"/><circle cx="'+(X+W/2+14)+'" cy="64" r="3" fill="var(--gold)"/>';
-  }
-  return g+'</svg>';
-}
 function paintEst(){
-  $("#door-pv").style.display = est.w==="door" ? "" : "none";
-  if(est.w==="door") $("#door-pv").innerHTML = doorSvg(est.size,est.style);
   var p = est.w==="door" ? EST.door[est.size][est.style] : EST.opener[est.drive];
   $("#est-price").textContent=money(p);
   $("#est-note").textContent = est.w==="door" ? "installed, old door hauled away" : "installed, remotes and keypad set up";
@@ -396,4 +371,3 @@ function pickGroup(id,key,num){
 }
 pickGroup("#est-what","w",false); pickGroup("#est-size","size",true); pickGroup("#est-style","style",true); pickGroup("#est-drive","drive",true);
 $("#est-book").addEventListener("click",function(){openSheet(est.w==="door"?"New door install":"Opener install")});
-paintEst();

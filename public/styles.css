@@ -255,10 +255,3 @@ header{gap:12px}
 .tk-confirm .cf-note{margin:10px 2px 0;font-weight:700;color:var(--on-gold);text-align:center}
 .tk-confirm .slam{background:#D9332B;color:#fff;border-color:var(--ink)}
 .tk-confirm .slam:disabled{opacity:.8}
-
-.scene{margin:0 -4px 14px;opacity:.55;pointer-events:none}
-.scene svg{display:block;width:100%;height:auto;max-height:105px}
-.door-pv{margin:2px 0 8px;padding:10px 6px;background:var(--bg);border:2px solid var(--line)}
-.door-pv svg{display:block;width:100%;height:auto;max-height:130px}
-@media (prefers-reduced-motion:no-preference){.door-pv svg{animation:pvIn .25s ease-out}}
-@keyframes pvIn{from{opacity:.3}to{opacity:1}}
