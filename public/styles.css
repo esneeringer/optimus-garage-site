@@ -1,4 +1,4 @@
-:root{--fd:"Barlow Condensed";--fb:var(--fb);
+:root{--fd:"Bebas Neue";--fb:"Outfit";
   --bg:#fff; --surface:#F3F8FC; --ink:#0A1A3A; --muted:#4B5668;
   --blue:#A8D3F2; --accent-text:#2F5F8F; --on-blue:#0A1A3A; --red:#D9544A; --red-text:#C0352C; --gold:#F5CB45; --on-gold:#0A1A3A; --gun:#4A5560; --line:#0A1A3A;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
