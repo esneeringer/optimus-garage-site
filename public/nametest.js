@@ -3,7 +3,7 @@ if(location.search.indexOf("names")<0)return;
 var N=[["Mainspring","Garage Door Co."],["Springhouse","Garage Doors"],["Patapsco","Door & Spring"],["Patapsco","Garage Door Co."],["True Track","Garage Doors"],["Steadfast","Garage Door Co."],["Counterweight","Garage Doors"],["Torque","Garage Door Co."],["Highline","Garage Doors"],["Ironbridge","Garage Doors"],["Stonemill","Garage Doors"],["Clearspring","Garage Doors"],["Hilltop","Garage Door Co."],["Switchback","Garage Company"]];
 var i=0;try{i=+(localStorage.getItem("nn2")||0)}catch(e){}
 var b=document.createElement("button");
-b.style.cssText="position:fixed;right:8px;top:78px;z-index:999;background:#E8B02F;color:#12261F;border:2px solid #12261F;border-radius:8px;font:600 13px system-ui;padding:8px 10px";
+b.style.cssText="position:fixed;right:8px;top:130px;z-index:999;background:#E8B02F;color:#12261F;border:2px solid #12261F;border-radius:8px;font:600 13px system-ui;padding:8px 10px";
 document.body.appendChild(b);
 function paint(){var n=N[i],lg=document.querySelector("header .logo > span");
 if(lg)lg.innerHTML=n[0]+"<small>"+n[1].replace("&","&amp;")+"</small>";
