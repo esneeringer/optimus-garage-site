@@ -66,9 +66,9 @@ async function sendBookedEmail(x) {
   if (!base) return "skipped (no public address)";
   const link = base + "/t/" + x.token;
   const what = String(x.service || "service").toLowerCase() + " visit on " + niceDay(x.date) + ", " + x.slot;
-  return mail.send(x.email, "You're booked with Switchback Spring & Door",
-    "You're booked: " + what + ".\n\nFollow your appointment live (and change or cancel it) here:\n" + link + "\n\nWe'll text or email you when we're on the way.\n\nSwitchback Spring & Door",
-    "<div style=\"font-family:Arial,sans-serif;color:#0A1A3A;max-width:480px\"><h2 style=\"margin:0 0 8px\">You're booked!</h2><p style=\"font-size:16px\">" + what + "</p><p><a href=\"" + link + "\" style=\"display:inline-block;background:#F5CB45;color:#0A1A3A;font-weight:800;padding:14px 22px;border:3px solid #0A1A3A;text-decoration:none\">Follow my appointment</a></p><p style=\"color:#4B5668\">You can change or cancel from that page. We'll text or email you when we're on the way.</p><p>Switchback Spring & Door</p></div>");
+  return mail.send(x.email, "You're booked with Switchback Garage Company",
+    "You're booked: " + what + ".\n\nFollow your appointment live (and change or cancel it) here:\n" + link + "\n\nWe'll text or email you when we're on the way.\n\nSwitchback Garage Company",
+    "<div style=\"font-family:Arial,sans-serif;color:#0A1A3A;max-width:480px\"><h2 style=\"margin:0 0 8px\">You're booked!</h2><p style=\"font-size:16px\">" + what + "</p><p><a href=\"" + link + "\" style=\"display:inline-block;background:#F5CB45;color:#0A1A3A;font-weight:800;padding:14px 22px;border:3px solid #0A1A3A;text-decoration:none\">Follow my appointment</a></p><p style=\"color:#4B5668\">You can change or cancel from that page. We'll text or email you when we're on the way.</p><p>Switchback Garage Company</p></div>");
 }
 
 async function bookTime(s) {
@@ -89,7 +89,7 @@ async function bookTime(s) {
         phones: [{ number: lead.phone, description: "MOBILE", primary: true, smsAllowed: false }],
         emails: lead.email ? [{ address: lead.email, description: "MAIN", primary: true }] : undefined,
         properties: [{ address: parseAddress(lead.address) }],
-        sourceAttribution: { sourceText: "Switchback Spring & Door website" },
+        sourceAttribution: { sourceText: "Switchback Garage Company website" },
     } }
   );
   const cc = created.clientCreate;
@@ -150,7 +150,7 @@ async function updatePrefs(p) {
     const base = publicBase();
     if (base) {
       const what = String(b.service || "service").toLowerCase() + " visit (" + niceDay(b.date) + ", " + b.slot + ")";
-      try { texted = " | " + await sms.send(b.phone, "Switchback Spring & Door: you're booked! " + what.charAt(0).toUpperCase() + what.slice(1) + ". Follow it live: " + base + "/t/" + b.token + "  Reply STOP to opt out."); }
+      try { texted = " | " + await sms.send(b.phone, "Switchback Garage Company: you're booked! " + what.charAt(0).toUpperCase() + what.slice(1) + ". Follow it live: " + base + "/t/" + b.token + "  Reply STOP to opt out."); }
       catch (e) { texted = " | text failed: " + e.message; }
     }
   }

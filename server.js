@@ -1,4 +1,4 @@
-// Very basic web server for Switchback Spring & Door. No packages needed.
+// Very basic web server for Switchback Garage Company. No packages needed.
 // Run:  node server.js   then open http://localhost:3000
 //
 // On the internet, set the SITE_PASSWORD environment variable to keep the
@@ -86,12 +86,12 @@ function allowed(req) {
   return samePassword(Buffer.from(header.slice(6), "base64").toString().split(":").slice(1).join(":"));
 }
 function loginPage(bad) {
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Switchback Spring & Door</title>
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex, nofollow"><title>Switchback Garage Company</title>
 <style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#F3F8FC;color:#0A1A3A;font:500 17px system-ui,sans-serif}
 form{width:min(340px,86vw)}h1{font:900 2rem/1 Arial Narrow,Impact,sans-serif;text-transform:uppercase;margin:0 0 6px}p{margin:0 0 16px;color:#4B5668}
 input,button{box-sizing:border-box;width:100%;font:inherit;padding:14px;border:3px solid #0A1A3A;margin-bottom:12px}
 button{background:#F5CB45;font-weight:800;text-transform:uppercase;cursor:pointer;box-shadow:0 5px 0 #0A1A3A}button:active{transform:translateY(5px);box-shadow:none}
-.e{color:#C0352C;font-weight:700}</style></head><body><form method="post" action="/login"><h1>Switchback Spring &amp; Door</h1>
+.e{color:#C0352C;font-weight:700}</style></head><body><form method="post" action="/login"><h1>Switchback Garage Company</h1>
 <p>Private preview. Enter the password.</p>${bad ? '<p class="e">That password was not right.</p>' : ""}
 <input type="password" name="password" placeholder="Password" autocomplete="current-password" autofocus required><button>Enter</button></form></body></html>`;
 }
@@ -329,7 +329,7 @@ const server = http.createServer((req, res) => {
 
 // 0.0.0.0 lets your phone on the same Wi-Fi (or a hosting service) reach it.
 server.listen(PORT, "0.0.0.0", () => {
-  console.log("Switchback Spring & Door site running on port " + PORT);
+  console.log("Switchback Garage Company site running on port " + PORT);
   console.log("  On this computer:  http://localhost:" + PORT);
   console.log("  Password protection: " + (PASSWORD ? "ON" : LOCKED ? "LOCKED (set SITE_PASSWORD to open the site)" : "off (set SITE_PASSWORD to turn it on)"));
 });

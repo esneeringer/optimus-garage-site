@@ -1,4 +1,4 @@
-# Switchback Spring & Door: site prototype
+# Switchback Garage Company: site prototype
 
 A very basic mobile-first site. No packages to install.
 

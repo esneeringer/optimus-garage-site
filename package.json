@@ -2,7 +2,7 @@
   "name": "optimus-garage-site",
   "version": "0.1.0",
   "private": true,
-  "description": "Switchback Spring & Door landing page prototype",
+  "description": "Switchback Garage Company landing page prototype",
   "engines": {
     "node": ">=18"
   },
