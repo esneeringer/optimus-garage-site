@@ -20,7 +20,7 @@
     $("#tk-svc").textContent=(info.service||"")+(info.when?" · "+info.when:"");
     $("#tk-call").href="tel:"+PHONE;
     $("#tk-via").textContent="This page updates by itself. Keep it open or come back to this link anytime.";
-    document.title=s.t+" | Optimus Garage Company";
+    document.title=s.t+" | Springline Garage Co.";
   }
   function when(d,slot){
     if(!d) return slot||"";

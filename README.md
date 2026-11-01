@@ -1,4 +1,4 @@
-# Optimus Garage Company: site prototype
+# Springline Garage Co.: site prototype
 
 A very basic mobile-first site. No packages to install.
 

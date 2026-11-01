@@ -1,6 +1,6 @@
 // Sends our own emails through Resend (no packages needed). Off until these are set on Render:
 //   RESEND_API_KEY   from resend.com
-//   MAIL_FROM        e.g. "Optimus Garage <bookings@yourdomain.com>" (a domain you verified in Resend)
+//   MAIL_FROM        e.g. "Springline Garage <bookings@yourdomain.com>" (a domain you verified in Resend)
 const https = require("https");
 const KEY = process.env.RESEND_API_KEY || "";
 const FROM = process.env.MAIL_FROM || "";
