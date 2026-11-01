@@ -212,7 +212,7 @@ const server = http.createServer((req, res) => {
     });
     return;
   }
-  const PUBLIC_ASSETS = ["/styles.css", "/logo.svg", "/track.js"];
+  const PUBLIC_ASSETS = ["/styles.css", "/logo.svg", "/track.js", "/designtest.js"];
   if (!allowed(req) && req.method === "GET" && PUBLIC_ASSETS.includes(pubPath)) { /* fall through to static */ }
   else if (!allowed(req)) {
     if (req.method === "GET" && !req.url.startsWith("/api/")) {
