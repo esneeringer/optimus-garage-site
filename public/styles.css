@@ -264,3 +264,10 @@ header{gap:12px}
 .checks li{display:flex;gap:10px;align-items:flex-start;font-weight:600}
 .checks li::before{content:"✓";flex:none;width:24px;height:24px;display:grid;place-items:center;background:var(--blue);color:var(--on-blue);border:2px solid var(--line);font-weight:900;font-size:.9rem}
 footer a{color:#fff}
+
+.banner{background:linear-gradient(180deg,rgba(10,26,58,.78),rgba(10,26,58,.94)),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120' viewBox='0 0 240 120'%3E%3Cg fill='none' stroke='white' stroke-opacity='.09' stroke-width='2'%3E%3Crect x='6' y='6' width='108' height='48' rx='3'/%3E%3Crect x='126' y='6' width='108' height='48' rx='3'/%3E%3Crect x='6' y='66' width='108' height='48' rx='3'/%3E%3Crect x='126' y='66' width='108' height='48' rx='3'/%3E%3C/g%3E%3C/svg%3E") center/240px 120px,#0A1A3A;color:#fff;padding:26px 0 24px;border-bottom:6px solid var(--gold)}
+.banner h1{color:#fff;margin:6px 0 0}
+.banner p.sub{color:#D7E3F1;margin:12px 0 0;max-width:34ch}
+.banner .area{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.55)}
+.hero{padding-top:22px}
+.banner h1{font-size:clamp(2.2rem,10vw,3rem)}
