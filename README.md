@@ -1,4 +1,4 @@
-# Springline Garage Co.: site prototype
+# Switchback Spring & Door: site prototype
 
 A very basic mobile-first site. No packages to install.
 
