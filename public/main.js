@@ -371,3 +371,10 @@ function pickGroup(id,key,num){
 }
 pickGroup("#est-what","w",false); pickGroup("#est-size","size",true); pickGroup("#est-style","style",true); pickGroup("#est-drive","drive",true);
 $("#est-book").addEventListener("click",function(){openSheet(est.w==="door"?"New door install":"Opener install")});
+
+(function(){try{
+  var els=document.querySelectorAll("section .wrap,.final .wrap");
+  if(!("IntersectionObserver" in window)||!els.length)return;
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}})},{threshold:.08});
+  els.forEach(function(el){el.classList.add("rv");io.observe(el)});
+}catch(e){}})();

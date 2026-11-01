@@ -286,3 +286,21 @@ footer a{color:#fff}
 }
 :root[data-theme="dark"] .banner{background:linear-gradient(180deg,rgba(10,26,58,.55),rgba(10,26,58,.85)),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120' viewBox='0 0 240 120'%3E%3Cg fill='none' stroke='white' stroke-opacity='.28' stroke-width='3'%3E%3Crect x='6' y='6' width='108' height='48' rx='3'/%3E%3Crect x='126' y='6' width='108' height='48' rx='3'/%3E%3Crect x='6' y='66' width='108' height='48' rx='3'/%3E%3Crect x='126' y='66' width='108' height='48' rx='3'/%3E%3C/g%3E%3C/svg%3E") center/240px 120px,#14284F;color:#fff}
 :root[data-theme="dark"] .banner h1{color:#fff}:root[data-theme="dark"] .banner p.sub{color:#D7E3F1}:root[data-theme="dark"] .banner .area{background:rgba(255,255,255,.1);color:#fff;border-color:rgba(255,255,255,.55)}
+
+html{font-synthesis:none}
+body{font-size:17.5px}
+h1,h2,h3{letter-spacing:.02em;line-height:1}
+h1{font-size:clamp(2.9rem,14vw,4.4rem)}
+h2{font-size:2.7rem}
+h3{font-size:1.7rem}
+section h2::after{content:"";display:block;width:54px;height:6px;background:var(--gold);margin-top:10px}
+section:nth-of-type(even){background:linear-gradient(180deg,var(--surface),var(--bg) 85%);margin-top:34px;padding-bottom:34px}
+.svc button,.est{box-shadow:0 6px 0 var(--ink),0 14px 22px -10px rgba(10,26,58,.35)}
+.why div{box-shadow:0 4px 0 var(--ink),0 12px 20px -10px rgba(10,26,58,.3)}
+@media (hover:hover){.why div{transition:transform .15s}.why div:hover{transform:translateY(-3px)}}
+.final{background:linear-gradient(180deg,rgba(10,26,58,.55),rgba(10,26,58,.9)),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120' viewBox='0 0 240 120'%3E%3Cg fill='none' stroke='white' stroke-opacity='.14' stroke-width='3'%3E%3Crect x='6' y='6' width='108' height='48' rx='3'/%3E%3Crect x='126' y='6' width='108' height='48' rx='3'/%3E%3Crect x='6' y='66' width='108' height='48' rx='3'/%3E%3Crect x='126' y='66' width='108' height='48' rx='3'/%3E%3C/g%3E%3C/svg%3E") center/240px 120px,#14284F;color:#fff;border-top:6px solid var(--gold)}
+.final h2{color:#fff;font-size:3.2rem}
+.final p{color:#D7E3F1}
+.rv{opacity:0;transform:translateY(14px);transition:opacity .45s ease-out,transform .45s ease-out}
+.rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none;transition:none}}
