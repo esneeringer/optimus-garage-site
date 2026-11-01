@@ -255,3 +255,12 @@ header{gap:12px}
 .tk-confirm .cf-note{margin:10px 2px 0;font-weight:700;color:var(--on-gold);text-align:center}
 .tk-confirm .slam{background:#D9332B;color:#fff;border-color:var(--ink)}
 .tk-confirm .slam:disabled{opacity:.8}
+
+.why{display:grid;gap:12px}
+.why div{border:3px solid var(--line);background:var(--surface);padding:14px 16px;border-left-width:10px;border-left-color:var(--blue)}
+.why h3{margin:0 0 4px;font-size:1.35rem}
+.why p{margin:0;color:var(--muted)}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.checks li{display:flex;gap:10px;align-items:flex-start;font-weight:600}
+.checks li::before{content:"✓";flex:none;width:24px;height:24px;display:grid;place-items:center;background:var(--blue);color:var(--on-blue);border:2px solid var(--line);font-weight:900;font-size:.9rem}
+footer a{color:#fff}
