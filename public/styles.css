@@ -371,3 +371,9 @@ input:focus-visible{outline:2px solid var(--accent-text);outline-offset:1px}
 .tag{border-radius:6px}
 .stickybar{border-top:1px solid var(--bd)}
 .lockbar{border-top:1px solid var(--bd)}
+
+/* ---- photo hero ---- */
+.banner,:root[data-theme="dark"] .banner,:root:not([data-theme="light"]) .banner{background:linear-gradient(180deg,rgba(11,20,16,.72) 0%,rgba(11,20,16,.55) 45%,rgba(11,20,16,.86) 100%),url(/hero.jpg) center 62%/cover no-repeat,#12261F;color:#fff;padding:34px 0 30px}
+.banner h1{color:#fff;text-shadow:0 2px 16px rgba(0,0,0,.35)}
+.banner p.sub{color:#E6EFEA}
+.banner .area{background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.5);backdrop-filter:blur(4px)}
