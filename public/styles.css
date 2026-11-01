@@ -1,10 +1,10 @@
 :root{--fd:"Bebas Neue","Arial Narrow",Impact,sans-serif;--fb:"Outfit",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --bg:#fff; --surface:#F3F7F4; --ink:#12261F; --muted:#4A5B53;
-  --blue:#DCE9E2; --accent-text:#1F6B4F; --on-blue:#12261F; --red:#B8402F; --red-text:#B8402F; --gold:#E8B02F; --on-gold:#12261F; --gun:#33433C; --line:#12261F; --bd:rgba(18,38,31,.16);
+  --blue:#DCE9E2; --accent-text:#1F6B4F; --on-blue:#12261F; --red:#B8402F; --red-text:#B8402F; --gold:#B85C26; --on-gold:#FFFFFF; --gun:#33433C; --line:#12261F; --bd:rgba(18,38,31,.16);
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16231E;--head:#0F1814;--surface:#1F332B;--ink:#F2F7F4;--muted:#B9C8C0;--line:#55705F;--blue:#2C5A47;--on-blue:#E6F2EC;--accent-text:#8FD1B0;--gold:#E8B02F;--on-gold:#12261F;--gun:#33433C;--red:#D9644F;--red-text:#FF9A86;--bd:rgba(255,255,255,.16);}}
-:root[data-theme="dark"]{--bg:#16231E;--head:#0F1814;--surface:#1F332B;--ink:#F2F7F4;--muted:#B9C8C0;--line:#55705F;--blue:#2C5A47;--on-blue:#E6F2EC;--accent-text:#8FD1B0;--gold:#E8B02F;--on-gold:#12261F;--gun:#33433C;--red:#D9644F;--red-text:#FF9A86;--bd:rgba(255,255,255,.16);}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#16231E;--head:#0F1814;--surface:#1F332B;--ink:#F2F7F4;--muted:#B9C8C0;--line:#55705F;--blue:#2C5A47;--on-blue:#E6F2EC;--accent-text:#8FD1B0;--gold:#B85C26;--on-gold:#FFFFFF;--gun:#33433C;--red:#D9644F;--red-text:#FF9A86;--bd:rgba(255,255,255,.16);}}
+:root[data-theme="dark"]{--bg:#16231E;--head:#0F1814;--surface:#1F332B;--ink:#F2F7F4;--muted:#B9C8C0;--line:#55705F;--blue:#2C5A47;--on-blue:#E6F2EC;--accent-text:#8FD1B0;--gold:#B85C26;--on-gold:#FFFFFF;--gun:#33433C;--red:#D9644F;--red-text:#FF9A86;--bd:rgba(255,255,255,.16);}
 *,*::before,*::after{box-sizing:border-box}
 html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font:500 17px/1.45 var(--fb),system-ui,-apple-system,"Segoe UI",sans-serif;padding-bottom:92px;overflow-x:hidden}
