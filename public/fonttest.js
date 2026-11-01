@@ -1,13 +1,12 @@
 (function(){
 if(location.search.indexOf("fonts")<0)return;
-var P=[["Barlow Condensed","Barlow","Barlow+Condensed:wght@700;800;900&family=Barlow:wght@500;600"],
-["Oswald","Source Sans 3","Oswald:wght@500;600;700&family=Source+Sans+3:wght@500;600"],
-["Archivo","Inter","Archivo:wght@700;800;900&family=Inter:wght@500;600"],
-["Montserrat","Open Sans","Montserrat:wght@700;800;900&family=Open+Sans:wght@500;600"],
-["Rubik","Rubik","Rubik:wght@500;600;800;900"],
-["Bebas Neue","Roboto","Bebas+Neue&family=Roboto:wght@500;700"],
-["Sora","DM Sans","Sora:wght@600;700;800&family=DM+Sans:wght@500;600"],
-["Poppins","Poppins","Poppins:wght@500;600;700;800"]];
+var P=[["Bebas Neue","Roboto","Bebas+Neue&family=Roboto:wght@500;700"],
+["Bebas Neue","Manrope","Bebas+Neue&family=Manrope:wght@500;600;700"],
+["Bebas Neue","Plus Jakarta Sans","Bebas+Neue&family=Plus+Jakarta+Sans:wght@500;600;700"],
+["Bebas Neue","DM Sans","Bebas+Neue&family=DM+Sans:wght@500;600;700"],
+["Bebas Neue","Outfit","Bebas+Neue&family=Outfit:wght@500;600;700"],
+["Bebas Neue","Figtree","Bebas+Neue&family=Figtree:wght@500;600;700"],
+["Bebas Neue","Barlow","Bebas+Neue&family=Barlow:wght@500;600;700"]];
 var i=0;try{i=+(localStorage.getItem("fi")||0)}catch(e){}
 var st=document.createElement("style");document.head.appendChild(st);
 var b=document.createElement("button");
